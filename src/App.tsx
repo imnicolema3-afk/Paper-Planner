@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, CalendarDays, BookOpen, BarChart3, Settings, FileCode, Check, HelpCircle, ChevronLeft, ChevronRight, PenTool, Loader2 } from 'lucide-react';
-import { PlannerState, ThemeType } from './types';
+import { PlannerState, ThemeType, UserProfile } from './types';
 import { generateInitialData, formatToISODate } from './data/initialData';
 
 // Import Views
@@ -13,7 +13,7 @@ import SpecsPortal from './components/SpecsPortal';
 import OnboardingView from './components/OnboardingView';
 
 // Firebase Imports
-import { auth, fetchPlannerData, savePlannerData } from './lib/firebase';
+import { auth, fetchPlannerData, savePlannerData, saveUserProfile } from './lib/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 
 export default function App() {
@@ -28,6 +28,7 @@ export default function App() {
 
   // 4. Firebase Authentication & Guest States
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile | null>(null);
   const [isGuestMode, setIsGuestMode] = useState<boolean>(true);
   const [loadingAuth, setLoadingAuth] = useState<boolean>(true);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
@@ -69,6 +70,11 @@ export default function App() {
         if (cloudData) {
           setState(cloudData.state);
           setTheme(cloudData.theme);
+          if (cloudData.profile) {
+            setCurrentUserProfile(cloudData.profile);
+          } else {
+            setCurrentUserProfile(null);
+          }
         } else {
           // New user: starts with clean empty state as requested
           const empty: PlannerState = {
@@ -81,10 +87,12 @@ export default function App() {
           };
           setState(empty);
           await savePlannerData(user.uid, empty, theme);
+          setCurrentUserProfile(null);
         }
         setLoadingAuth(false);
       } else {
         setCurrentUser(null);
+        setCurrentUserProfile(null);
         setLoadingAuth(false);
       }
     });
@@ -173,6 +181,14 @@ export default function App() {
   const handleLoginSuccess = (userId: string, fetchedState: PlannerState, fetchedTheme: ThemeType) => {
     setIsGuestMode(false);
     setShowAuthModal(false);
+    // Snappy load
+    fetchPlannerData(userId).then(cloudData => {
+      if (cloudData) {
+        if (cloudData.profile) setCurrentUserProfile(cloudData.profile);
+        if (cloudData.state) setState(cloudData.state);
+        if (cloudData.theme) setTheme(cloudData.theme);
+      }
+    });
   };
 
   // Guest Bypasser Handler
@@ -216,6 +232,25 @@ export default function App() {
           {/* Quick Controls */}
           <div className="flex items-center gap-2">
             
+            {currentUser && currentUserProfile && (
+              <button 
+                onClick={() => setActiveTab('settings')} 
+                className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-inherit bg-white dark:bg-stone-950 hover:bg-stone-50 dark:hover:bg-stone-900 cursor-pointer transition-all shadow-3xs"
+                title={`${currentUserProfile.name}'s Profile`}
+              >
+                <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs shrink-0 select-none">
+                  {currentUserProfile.profileImage.startsWith("http") ? (
+                    <img src={currentUserProfile.profileImage} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <span>{currentUserProfile.profileImage}</span>
+                  )}
+                </div>
+                <span className="text-[10.5px] font-sans font-medium text-stone-700 dark:text-stone-300 hidden sm:inline max-w-[80px] truncate">
+                  {currentUserProfile.name.split(" ")[0]}
+                </span>
+              </button>
+            )}
+
             {/* Quick date navigators (Only relevant on Today View) */}
             {activeTab === 'today' && (
               <div className="flex items-center border border-inherit rounded-lg bg-white dark:bg-stone-950 p-0.5 overflow-hidden shadow-2xs">
@@ -310,6 +345,14 @@ export default function App() {
             onUpdateState={handleUpdateState}
             userEmail={currentUser ? currentUser.email : null}
             onLogout={handleLogout}
+            userProfile={currentUserProfile}
+            onUpdateProfile={(profile) => {
+              if (currentUser) {
+                saveUserProfile(currentUser.uid, profile).then(() => {
+                  setCurrentUserProfile(profile);
+                });
+              }
+            }}
           />
         )}
 

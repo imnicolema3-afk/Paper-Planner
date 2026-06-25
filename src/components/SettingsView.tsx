@@ -1,6 +1,6 @@
 import React from 'react';
-import { Settings, Moon, Sun, RotateCcw, Download, Upload, Trash2, Heart, ExternalLink, RefreshCw, Cloud, LogOut } from 'lucide-react';
-import { ThemeType, PlannerState } from '../types';
+import { Settings, Moon, Sun, RotateCcw, Download, Upload, Trash2, Heart, ExternalLink, RefreshCw, Cloud, LogOut, User, Phone, Cake, Activity, Check, Edit3, Save, ChevronDown } from 'lucide-react';
+import { ThemeType, PlannerState, UserProfile } from '../types';
 import { generateInitialData } from '../data/initialData';
 
 interface SettingsViewProps {
@@ -10,9 +10,49 @@ interface SettingsViewProps {
   onUpdateState: (updater: (prev: PlannerState) => PlannerState) => void;
   userEmail: string | null;
   onLogout: () => void;
+  userProfile?: UserProfile | null;
+  onUpdateProfile?: (profile: UserProfile) => void;
 }
 
-export default function SettingsView({ theme, onChangeTheme, state, onUpdateState, userEmail, onLogout }: SettingsViewProps) {
+export default function SettingsView({ 
+  theme, 
+  onChangeTheme, 
+  state, 
+  onUpdateState, 
+  userEmail, 
+  onLogout,
+  userProfile,
+  onUpdateProfile
+}: SettingsViewProps) {
+  
+  // Profile editing states
+  const [isEditingProfile, setIsEditingProfile] = React.useState(false);
+  const [editName, setEditName] = React.useState(userProfile?.name || "");
+  const [editPhone, setEditPhone] = React.useState(userProfile?.phone || "");
+  const [editBirthday, setEditBirthday] = React.useState(userProfile?.birthday || "");
+  const [editGender, setEditGender] = React.useState(userProfile?.gender || "");
+  const [editImage, setEditImage] = React.useState(userProfile?.profileImage || "🍵");
+
+  // Keep internal state synchronized with userProfile props changes
+  React.useEffect(() => {
+    if (userProfile) {
+      setEditName(userProfile.name);
+      setEditPhone(userProfile.phone);
+      setEditBirthday(userProfile.birthday);
+      setEditGender(userProfile.gender);
+      setEditImage(userProfile.profileImage);
+    }
+  }, [userProfile]);
+
+  const avatarPresets = [
+    { emoji: "🍵", bg: "bg-emerald-50 text-emerald-800 border-emerald-200/50 dark:bg-emerald-950/20 dark:text-emerald-300 dark:border-emerald-900/30", label: "Matcha" },
+    { emoji: "☕", bg: "bg-amber-50 text-amber-800 border-amber-200/50 dark:bg-amber-950/20 dark:text-amber-300 dark:border-amber-900/30", label: "Brew" },
+    { emoji: "🌿", bg: "bg-teal-50 text-teal-800 border-teal-200/50 dark:bg-teal-950/20 dark:text-teal-300 dark:border-teal-900/30", label: "Sage" },
+    { emoji: "🌙", bg: "bg-slate-50 text-slate-800 border-slate-250 dark:bg-slate-900/40 dark:text-slate-300 dark:border-slate-800", label: "Midnight" },
+    { emoji: "🌊", bg: "bg-sky-50 text-sky-800 border-sky-200/50 dark:bg-sky-950/20 dark:text-sky-300 dark:border-sky-900/30", label: "Ocean" },
+    { emoji: "🪵", bg: "bg-orange-50 text-orange-800 border-orange-200/50 dark:bg-orange-950/20 dark:text-orange-300 dark:border-orange-900/30", label: "Wood" }
+  ];
+
   // Reset database to initial sample data
   const handleRestoreSampleData = () => {
     if (window.confirm('This will populate sample entries for today, yesterday, and past days. Any custom modifications will be preserved or merged. Proceed?')) {
@@ -129,6 +169,211 @@ export default function SettingsView({ theme, onChangeTheme, state, onUpdateStat
             <span>{userEmail ? "Sign Out & Switch Account" : "Access Cloud & Log In"}</span>
           </button>
         </div>
+
+        {/* USER PROFILE SECTION */}
+        {userEmail && userProfile && (
+          <div className="p-5 bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800" id="user-profile-card">
+            <div className="flex justify-between items-center mb-4 border-b border-stone-100 dark:border-stone-850 pb-2.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 flex items-center gap-1.5 font-mono">
+                <User className="w-4 h-4 text-natural-sage" />
+                <span>Your Profile Parchment</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  if (isEditingProfile) {
+                    // Save profile changes
+                    if (onUpdateProfile) {
+                      onUpdateProfile({
+                        name: editName,
+                        phone: editPhone,
+                        birthday: editBirthday,
+                        gender: editGender,
+                        profileImage: editImage,
+                        email: userEmail
+                      });
+                    }
+                  }
+                  setIsEditingProfile(!isEditingProfile);
+                }}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer border ${
+                  isEditingProfile 
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-300 dark:border-emerald-900/50' 
+                    : theme === 'natural-tones'
+                      ? 'bg-natural-sage/10 text-natural-sage border-natural-sage/20 hover:bg-natural-sage/20'
+                      : 'bg-stone-50 hover:bg-stone-100 dark:bg-stone-900 dark:hover:bg-stone-850 text-stone-750 dark:text-stone-300 border-stone-200 dark:border-stone-800'
+                }`}
+              >
+                {isEditingProfile ? (
+                  <>
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Save Changes</span>
+                  </>
+                ) : (
+                  <>
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>Edit Profile</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {isEditingProfile ? (
+              <div className="space-y-4 pt-1 animate-fade-in">
+                {/* Avatar selector */}
+                <div>
+                  <label className="block text-[10px] font-mono uppercase text-stone-400 dark:text-stone-500 mb-2 font-semibold">
+                    Profile Avatar
+                  </label>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 rounded-xl border border-stone-150 dark:border-stone-800/60 bg-stone-50/40 dark:bg-stone-900/20">
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 text-2xl shadow-2xs shrink-0 overflow-hidden select-none">
+                      {editImage.startsWith("http") ? (
+                        <img src={editImage} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      ) : (
+                        <span>{editImage}</span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {avatarPresets.map((p, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setEditImage(p.emoji)}
+                          className={`w-9 h-9 rounded-full border flex items-center justify-center text-lg shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer ${p.bg} ${
+                            editImage === p.emoji ? "ring-2 ring-natural-sage ring-offset-2 dark:ring-offset-stone-900" : ""
+                          }`}
+                          title={p.label}
+                        >
+                          {p.emoji}
+                        </button>
+                      ))}
+                      {userProfile.profileImage.startsWith("http") && editImage !== userProfile.profileImage && (
+                        <button
+                          type="button"
+                          onClick={() => setEditImage(userProfile.profileImage)}
+                          className="w-9 h-9 rounded-full border overflow-hidden hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                          title="Original Profile Photo"
+                        >
+                          <img src={userProfile.profileImage} alt="Original Photo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Form fields */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-mono uppercase text-stone-400 dark:text-stone-500 mb-1 font-semibold">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className={`w-full px-3 py-1.5 text-sm border rounded-lg bg-white dark:bg-stone-950 text-stone-850 dark:text-stone-100 focus:outline-none focus:ring-1 ${
+                        theme === "natural-tones" 
+                          ? "border-natural-border focus:ring-natural-sage focus:border-natural-sage" 
+                          : "border-stone-200 dark:border-stone-800 focus:ring-amber-500 focus:border-amber-500"
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-mono uppercase text-stone-400 dark:text-stone-500 mb-1 font-semibold">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      value={editPhone}
+                      onChange={(e) => setEditPhone(e.target.value)}
+                      className={`w-full px-3 py-1.5 text-sm border rounded-lg bg-white dark:bg-stone-950 text-stone-850 dark:text-stone-100 focus:outline-none focus:ring-1 ${
+                        theme === "natural-tones" 
+                          ? "border-natural-border focus:ring-natural-sage focus:border-natural-sage" 
+                          : "border-stone-200 dark:border-stone-800 focus:ring-amber-500 focus:border-amber-500"
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-mono uppercase text-stone-400 dark:text-stone-500 mb-1 font-semibold">
+                      Birthday
+                    </label>
+                    <input
+                      type="date"
+                      value={editBirthday}
+                      onChange={(e) => setEditBirthday(e.target.value)}
+                      className={`w-full px-3 py-1.5 text-sm border rounded-lg bg-white dark:bg-stone-950 text-stone-850 dark:text-stone-100 focus:outline-none focus:ring-1 ${
+                        theme === "natural-tones" 
+                          ? "border-natural-border focus:ring-natural-sage focus:border-natural-sage" 
+                          : "border-stone-200 dark:border-stone-800 focus:ring-amber-500 focus:border-amber-500"
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-mono uppercase text-stone-400 dark:text-stone-500 mb-1 font-semibold">
+                      Gender
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={editGender}
+                        onChange={(e) => setEditGender(e.target.value)}
+                        className={`w-full pl-3 pr-8 py-1.5 text-sm border rounded-lg bg-white dark:bg-stone-950 text-stone-850 dark:text-stone-100 focus:outline-none focus:ring-1 appearance-none ${
+                          theme === "natural-tones" 
+                            ? "border-natural-border focus:ring-natural-sage focus:border-natural-sage" 
+                            : "border-stone-200 dark:border-stone-800 focus:ring-amber-500 focus:border-amber-500"
+                        }`}
+                      >
+                        <option value="">Select Gender</option>
+                        <option value="female">Female</option>
+                        <option value="male">Male</option>
+                        <option value="non-binary">Non-binary</option>
+                        <option value="prefer-not-to-say">Prefer not to say</option>
+                      </select>
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center py-2 animate-fade-in">
+                {/* Profile Pic preview */}
+                <div className="flex items-center justify-center w-16 h-16 rounded-full border-2 border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 text-3xl shadow-xs overflow-hidden shrink-0 select-none">
+                  {userProfile.profileImage.startsWith("http") ? (
+                    <img src={userProfile.profileImage} alt={userProfile.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <span>{userProfile.profileImage}</span>
+                  )}
+                </div>
+
+                {/* Details list */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-3 flex-1 w-full text-xs">
+                  <div>
+                    <span className="block font-mono text-[9px] uppercase tracking-wider text-stone-400 dark:text-stone-500">Full Name</span>
+                    <span className="font-semibold text-stone-800 dark:text-stone-200 mt-0.5 block">{userProfile.name || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="block font-mono text-[9px] uppercase tracking-wider text-stone-400 dark:text-stone-500">Phone</span>
+                    <span className="text-stone-700 dark:text-stone-300 mt-0.5 block">{userProfile.phone || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="block font-mono text-[9px] uppercase tracking-wider text-stone-400 dark:text-stone-500">Birthday</span>
+                    <span className="text-stone-700 dark:text-stone-300 mt-0.5 block">
+                      {userProfile.birthday ? new Date(userProfile.birthday).toLocaleDateString(undefined, { dateStyle: 'medium' }) : "—"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block font-mono text-[9px] uppercase tracking-wider text-stone-400 dark:text-stone-500">Gender</span>
+                    <span className="text-stone-700 dark:text-stone-300 mt-0.5 block capitalize">{userProfile.gender || "—"}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* THEME SELECTOR CARD */}
         <div className="p-5 bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800">

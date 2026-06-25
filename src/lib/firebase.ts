@@ -13,7 +13,7 @@ import {
   getDoc, 
   setDoc 
 } from "firebase/firestore";
-import { PlannerState, ThemeType } from "../types";
+import { PlannerState, ThemeType, UserProfile } from "../types";
 
 // Firebase Config from firebase-applet-config.json
 const firebaseConfig = {
@@ -29,7 +29,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = initializeFirestore(app, {
   databaseId: "ai-studio-abf0e318-3b2a-4de9-b666-b8e04d39b3b0"
-});
+} as any);
 
 // Helper: Save planner state & theme to Cloud Firestore
 export async function savePlannerData(userId: string, state: PlannerState, theme: ThemeType) {
@@ -45,8 +45,21 @@ export async function savePlannerData(userId: string, state: PlannerState, theme
   }
 }
 
+// Helper: Save user profile to Cloud Firestore
+export async function saveUserProfile(userId: string, profile: UserProfile) {
+  try {
+    const userDocRef = doc(db, "users", userId);
+    await setDoc(userDocRef, {
+      profile,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+  } catch (error) {
+    console.error("Error saving user profile to Firestore:", error);
+  }
+}
+
 // Helper: Fetch planner state & theme from Cloud Firestore
-export async function fetchPlannerData(userId: string): Promise<{ state: PlannerState; theme: ThemeType } | null> {
+export async function fetchPlannerData(userId: string): Promise<{ state: PlannerState; theme: ThemeType; profile?: UserProfile } | null> {
   try {
     const userDocRef = doc(db, "users", userId);
     const snap = await getDoc(userDocRef);
@@ -55,7 +68,8 @@ export async function fetchPlannerData(userId: string): Promise<{ state: Planner
       if (data && data.state) {
         return {
           state: data.state as PlannerState,
-          theme: (data.theme || "natural-tones") as ThemeType
+          theme: (data.theme || "natural-tones") as ThemeType,
+          profile: data.profile as UserProfile
         };
       }
     }
@@ -64,3 +78,4 @@ export async function fetchPlannerData(userId: string): Promise<{ state: Planner
   }
   return null;
 }
+

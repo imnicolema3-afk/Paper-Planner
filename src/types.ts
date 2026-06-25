@@ -53,3 +53,13 @@ export interface PlannerState {
 }
 
 export type ThemeType = 'natural-tones' | 'warm-paper' | 'slate-clean' | 'charcoal-dark';
+
+export interface UserProfile {
+  name: string;
+  birthday: string;
+  gender: string;
+  profileImage: string;
+  email: string;
+  phone: string;
+}
+
