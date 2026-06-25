@@ -423,8 +423,8 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
   };
 
   const getSectionHeaderClass = () => {
-    if (theme === 'natural-tones') return 'text-[11px] font-bold uppercase tracking-[0.1em] text-natural-muted';
-    return 'text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300';
+    if (theme === 'natural-tones') return 'text-xs font-bold uppercase tracking-[0.1em] text-natural-muted';
+    return 'text-sm font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300';
   };
 
   const getButtonAccentClass = () => {
@@ -446,14 +446,14 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
       {/* Date Header Title */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-stone-200 dark:border-stone-800 pb-4 mb-2">
         <div>
-          <span className={`text-xs font-mono uppercase tracking-widest ${getWeekdayTextClass()}`}>
+          <span className={`text-sm font-mono uppercase tracking-widest ${getWeekdayTextClass()}`}>
             {weekday}
           </span>
-          <h2 className="text-2xl md:text-3xl font-serif font-light text-stone-800 dark:text-stone-100 tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-serif font-light text-stone-800 dark:text-stone-100 tracking-tight mt-0.5">
             {dateString}
           </h2>
         </div>
-        <div className="flex items-center gap-2 mt-2 md:mt-0 text-[11px] font-mono text-stone-400 dark:text-stone-500 bg-stone-50 dark:bg-stone-900/60 px-3 py-1.5 rounded-lg border border-stone-100 dark:border-stone-800">
+        <div className="flex items-center gap-2 mt-2 md:mt-0 text-xs font-mono text-stone-400 dark:text-stone-500 bg-stone-50 dark:bg-stone-900/60 px-3.5 py-2 rounded-lg border border-stone-100 dark:border-stone-800">
           <span className={`w-2 h-2 rounded-full ${userEmail ? 'bg-sky-550' : 'bg-emerald-500'} animate-pulse`}></span>
           {userEmail ? 'Cloud Backup Synced' : 'Guest Mode • Local Save'}
         </div>
@@ -461,36 +461,36 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
 
       {/* Cloud Backup Promotion Banner (only for Guests / local-only mode) */}
       {!userEmail && (
-        <div className={`p-4 rounded-xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
+        <div className={`p-5 rounded-xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
           theme === 'natural-tones'
             ? 'bg-natural-sage-light/25 border-natural-border/50 rounded-[24px]'
             : 'bg-amber-50/40 dark:bg-amber-950/10 border-amber-100/50 dark:border-amber-900/30'
         }`} id="cloud-sync-banner">
           <div className="flex gap-3">
-            <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
               theme === 'natural-tones' ? 'bg-natural-sage/10 text-natural-sage' : 'bg-amber-100/50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400'
             }`}>
-              <Cloud className="w-4.5 h-4.5" />
+              <Cloud className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-semibold text-stone-800 dark:text-stone-200">
+              <h4 className="text-sm font-semibold text-stone-800 dark:text-stone-200">
                 Offline Guest Mode: Your logs are stored locally
               </h4>
-              <p className="text-[11px] text-stone-550 dark:text-stone-400 mt-0.5 leading-relaxed font-sans">
+              <p className="text-[13px] text-stone-550 dark:text-stone-400 mt-0.5 leading-relaxed font-sans">
                 Set up your day, write some entries, then save them safely in the cloud so you never lose your beautiful planner parchment when switching tablets.
               </p>
             </div>
           </div>
           <button
             onClick={onOpenAuth}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shrink-0 shadow-2xs hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-1.5 shrink-0 shadow-2xs hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer ${
               theme === 'natural-tones'
                 ? 'bg-natural-sage text-white hover:bg-natural-sage/95'
                 : 'bg-stone-800 hover:bg-stone-900 text-white dark:bg-stone-200 dark:text-stone-950 dark:hover:bg-stone-100'
             }`}
           >
             <span>Cloud Backup</span>
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       )}
@@ -503,21 +503,21 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
           </h3>
           <button
             onClick={() => setShowAddEvent(!showAddEvent)}
-            className={`flex items-center gap-1 text-[11px] font-medium border px-2.5 py-1 rounded transition-all cursor-pointer ${getButtonAccentClass()}`}
+            className={`flex items-center gap-1 text-xs font-medium border px-3 py-1.5 rounded-lg transition-all cursor-pointer ${getButtonAccentClass()}`}
           >
-            <Plus className="w-3 h-3" />
+            <Plus className="w-3.5 h-3.5" />
             {showAddEvent ? 'Cancel' : 'Add Event'}
           </button>
         </div>
 
         {/* Add Event Form */}
         {showAddEvent && (
-          <form onSubmit={handleAddEvent} className="mb-4 p-3 bg-white dark:bg-stone-950 rounded-lg border border-stone-200 dark:border-stone-800 flex flex-wrap gap-2 items-center">
+          <form onSubmit={handleAddEvent} className="mb-4 p-3.5 bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800 flex flex-wrap gap-2.5 items-center">
             <input
               type="time"
               value={eventTime}
               onChange={(e) => setEventTime(e.target.value)}
-              className="px-2 py-1 text-xs border border-stone-200 dark:border-stone-800 rounded bg-stone-50 dark:bg-stone-900 font-mono text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-natural-sage"
+              className="px-3 py-2 text-sm border border-stone-200 dark:border-stone-800 rounded-lg bg-stone-50 dark:bg-stone-900 font-mono text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-natural-sage"
               required
             />
             <input
@@ -525,12 +525,12 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
               placeholder="e.g. Lunch with Mom"
               value={eventTitle}
               onChange={(e) => setEventTitle(e.target.value)}
-              className="flex-1 min-w-[150px] px-2.5 py-1 text-xs border border-stone-200 dark:border-stone-800 rounded bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-natural-sage placeholder-stone-400 dark:placeholder-stone-600"
+              className="flex-1 min-w-[150px] px-3.5 py-2 text-sm border border-stone-200 dark:border-stone-800 rounded-lg bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-natural-sage placeholder-stone-400 dark:placeholder-stone-600"
               required
             />
             <button
               type="submit"
-              className={`px-3 py-1 text-xs rounded transition-colors font-medium cursor-pointer ${getSubmitButtonClass()}`}
+              className={`px-4 py-2 text-sm rounded-lg transition-colors font-medium cursor-pointer ${getSubmitButtonClass()}`}
             >
               Save
             </button>
@@ -539,29 +539,29 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
 
         {/* Events List */}
         {dayEvents.length === 0 ? (
-          <p className="text-xs text-stone-400 dark:text-stone-500 italic py-2 text-center">
+          <p className="text-sm text-stone-400 dark:text-stone-500 italic py-3 text-center">
             No scheduled events
           </p>
         ) : (
-          <div className={`${theme === 'natural-tones' ? 'flex flex-row flex-wrap gap-4' : 'space-y-1.5'}`}>
+          <div className={`${theme === 'natural-tones' ? 'flex flex-row flex-wrap gap-4' : 'space-y-2'}`}>
             {dayEvents.map((event) => (
               <div
                 key={event.id}
                 className={`group transition-all ${
                   theme === 'natural-tones'
                     ? 'bg-natural-sage-light px-4 py-2.5 rounded-[14px] border border-natural-sage-border text-sm flex items-center justify-between gap-4'
-                    : 'flex justify-between items-center py-2 px-3 bg-white dark:bg-stone-950 rounded border border-stone-200/50 dark:border-stone-900/50 hover:border-amber-200 dark:hover:border-amber-900/30'
+                    : 'flex justify-between items-center py-2 px-3 bg-white dark:bg-stone-950 rounded-lg border border-stone-200/50 dark:border-stone-900/50 hover:border-amber-200 dark:hover:border-amber-900/30 text-sm'
                 }`}
               >
                 <div className="flex items-center gap-2">
                   <span className={`${
                     theme === 'natural-tones'
-                      ? 'font-bold text-natural-sage font-mono'
-                      : 'font-mono text-xs text-amber-800 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded border border-amber-100 dark:border-amber-950 mr-2'
+                      ? 'font-bold text-natural-sage font-mono text-sm'
+                      : 'font-mono text-xs sm:text-sm text-amber-800 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded border border-amber-100 dark:border-amber-950 mr-2 shrink-0'
                   }`}>
                     {event.time}
                   </span>
-                  <span className="text-xs font-serif text-stone-800 dark:text-stone-200">
+                  <span className="text-sm sm:text-[15px] font-serif font-medium text-stone-800 dark:text-stone-200 leading-snug">
                     {event.title}
                   </span>
                 </div>
@@ -588,50 +588,50 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
             : 'bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800'
         }`} id="tasks-card">
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-3 border-b border-stone-100 dark:border-stone-900 pb-2 flex items-center justify-between">
-              <span className={theme === 'natural-tones' ? 'text-[11px] font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>Today's Tasks</span>
-              <span className="text-[10px] font-mono text-stone-400 dark:text-stone-500 font-normal">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-3 border-b border-stone-100 dark:border-stone-900 pb-2 flex items-center justify-between">
+              <span className={theme === 'natural-tones' ? 'text-xs font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>Today's Tasks</span>
+              <span className="text-xs font-mono text-stone-400 dark:text-stone-500 font-normal">
                 {dayTasks.filter(t => t.completed).length}/{dayTasks.length} Done
               </span>
             </h3>
 
             {/* Task input at top of card */}
-            <form onSubmit={handleAddTask} className="mb-4 flex flex-col gap-2">
+            <form onSubmit={handleAddTask} className="mb-4 flex flex-col gap-2.5">
               <div className="flex gap-1.5">
                 <input
                   type="text"
                   placeholder="Create task..."
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
-                  className={`flex-1 px-2.5 py-1.5 text-xs border rounded bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 dark:placeholder-stone-600 ${
+                  className={`flex-1 px-3.5 py-2 text-sm border rounded-lg bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 dark:placeholder-stone-600 ${
                     theme === 'natural-tones' ? 'border-natural-border focus:ring-1 focus:ring-natural-sage' : 'border-stone-200 dark:border-stone-800 focus:outline-amber-600'
                   }`}
                   required
                 />
                 <button
                   type="submit"
-                  className={`px-3 border text-stone-700 dark:text-stone-300 rounded cursor-pointer transition-colors ${
+                  className={`px-4 border text-stone-700 dark:text-stone-300 rounded-lg cursor-pointer transition-colors ${
                     theme === 'natural-tones'
                       ? 'bg-white hover:bg-natural-sage-light border-natural-border text-natural-sage'
                       : 'bg-stone-100 dark:bg-stone-900 hover:bg-amber-100/50 dark:hover:bg-amber-950/30 border-stone-200 dark:border-stone-800'
                   }`}
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Tag selector */}
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1.5">
                 {(['Tea', 'Travel', 'College', 'Personal', 'None'] as TaskTag[]).map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => setTaskTag(tag)}
-                    className={`px-2 py-0.5 rounded text-[10px] transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer ${
                       taskTag === tag
                         ? theme === 'natural-tones'
-                          ? 'bg-natural-sage text-white scale-105 font-medium'
-                          : 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-950 scale-105 font-medium'
+                          ? 'bg-natural-sage text-white scale-[1.02] font-medium'
+                          : 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-950 scale-[1.02] font-medium'
                         : theme === 'natural-tones'
                         ? 'bg-natural-sage-light text-natural-tag-text border border-natural-sage-border/50 hover:bg-natural-tag-bg'
                         : 'bg-stone-100 text-stone-500 dark:bg-stone-900 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-800'
@@ -645,7 +645,7 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
 
             {/* Tasks list */}
             {dayTasks.length === 0 ? (
-              <p className="text-xs text-stone-400 dark:text-stone-500 italic py-6 text-center">
+              <p className="text-sm text-stone-400 dark:text-stone-500 italic py-6 text-center">
                 No tasks added for this day
               </p>
             ) : (
@@ -653,13 +653,13 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                 {dayTasks.map((task) => (
                   <div
                     key={task.id}
-                    className="group flex justify-between items-center py-1.5 px-2 hover:bg-stone-50/50 dark:hover:bg-stone-900/40 rounded transition-all"
+                    className="group flex justify-between items-center py-2 px-2 hover:bg-stone-50/50 dark:hover:bg-stone-900/40 rounded-lg transition-all"
                   >
-                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
                       <button
                         type="button"
                         onClick={() => handleToggleTask(task.id)}
-                        className={`w-[18px] h-[18px] rounded-[6px] border flex items-center justify-center transition-all cursor-pointer ${
+                        className={`w-[20px] h-[20px] rounded-[6px] border flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                           task.completed
                             ? theme === 'natural-tones'
                               ? 'bg-natural-sage border-natural-sage'
@@ -670,30 +670,30 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                         }`}
                       >
                         {task.completed && (
-                          <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
+                          <Check className="w-3 h-3 text-white stroke-[3]" />
                         )}
                       </button>
                       <span
                         onClick={() => handleToggleTask(task.id)}
-                        className={`text-[15px] select-none truncate cursor-pointer transition-all ${
+                        className={`text-base select-none truncate cursor-pointer transition-all ${
                           task.completed
-                            ? 'line-through text-stone-400 dark:text-stone-600 opacity-50'
+                            ? 'line-through text-stone-400 dark:text-stone-600 opacity-60'
                             : 'text-stone-800 dark:text-stone-200 font-sans'
                         }`}
                       >
                         {task.title}
                       </span>
                       {task.tag !== 'None' && (
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${getTagStyle(task.tag)}`}>
+                        <span className={`text-[11px] font-sans font-medium px-2.5 py-0.5 rounded-full ${getTagStyle(task.tag)}`}>
                           {task.tag}
                         </span>
                       )}
                     </div>
                     <button
                       onClick={() => handleDeleteTask(task.id)}
-                      className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-rose-600 transition-all p-0.5 rounded cursor-pointer"
+                      className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-rose-600 transition-all p-1 hover:bg-stone-50 dark:hover:bg-stone-900 rounded cursor-pointer"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ))}
@@ -709,8 +709,8 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
             : 'bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800'
         }`} id="reminders-card">
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-3 border-b border-stone-100 dark:border-stone-900 pb-2">
-              <span className={theme === 'natural-tones' ? 'text-[11px] font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>Bullet Reminders</span>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-3 border-b border-stone-100 dark:border-stone-900 pb-2">
+              <span className={theme === 'natural-tones' ? 'text-xs font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>Bullet Reminders</span>
             </h3>
 
             {/* Reminder entry */}
@@ -720,40 +720,40 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                 placeholder="Submit assignment, renew insurance..."
                 value={reminderTitle}
                 onChange={(e) => setReminderTitle(e.target.value)}
-                className={`flex-1 px-2.5 py-1.5 text-xs border rounded bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 dark:placeholder-stone-600 ${
+                className={`flex-1 px-3.5 py-2 text-sm border rounded-lg bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 dark:placeholder-stone-600 ${
                   theme === 'natural-tones' ? 'border-natural-border focus:ring-1 focus:ring-natural-sage' : 'border-stone-200 dark:border-stone-800 focus:outline-amber-600'
                 }`}
                 required
               />
               <button
                 type="submit"
-                className={`px-3 border text-stone-700 dark:text-stone-300 rounded cursor-pointer transition-colors ${
+                className={`px-4 border text-stone-700 dark:text-stone-300 rounded-lg cursor-pointer transition-colors ${
                   theme === 'natural-tones'
                     ? 'bg-white hover:bg-natural-sage-light border-natural-border text-natural-sage'
                     : 'bg-stone-100 dark:bg-stone-900 hover:bg-amber-100/50 dark:hover:bg-amber-950/30 border-stone-200 dark:border-stone-800'
                 }`}
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
               </button>
             </form>
 
 
             {/* Reminders List */}
             {dayReminders.length === 0 ? (
-              <p className="text-xs text-stone-400 dark:text-stone-500 italic py-6 text-center">
+              <p className="text-sm text-stone-400 dark:text-stone-500 italic py-6 text-center">
                 No reminders noted
               </p>
             ) : (
-              <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
                 {dayReminders.map((rem) => (
                   <div
                     key={rem.id}
-                    className="group flex justify-between items-start py-1 px-2 hover:bg-stone-50/50 dark:hover:bg-stone-900/40 rounded transition-all"
+                    className="group flex justify-between items-start py-2 px-2 hover:bg-stone-50/50 dark:hover:bg-stone-900/40 rounded-lg transition-all"
                   >
-                    <div className="flex items-start gap-2 flex-1 min-w-0">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
                       <span
                         onClick={() => handleToggleReminder(rem.id)}
-                        className={`w-1.5 h-1.5 rounded-full mt-1.5 cursor-pointer transition-all shrink-0 ${
+                        className={`w-2 h-2 rounded-full mt-2 cursor-pointer transition-all shrink-0 ${
                           rem.completed
                             ? theme === 'natural-tones'
                               ? 'bg-natural-border'
@@ -765,9 +765,9 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                       ></span>
                       <span
                         onClick={() => handleToggleReminder(rem.id)}
-                        className={`text-[15px] cursor-pointer select-none leading-normal ${
+                        className={`text-base cursor-pointer select-none leading-normal ${
                           rem.completed
-                            ? 'line-through text-stone-400 dark:text-stone-600 opacity-50 font-sans'
+                            ? 'line-through text-stone-400 dark:text-stone-600 opacity-60 font-sans'
                             : 'text-stone-800 dark:text-stone-200 font-sans'
                         }`}
                       >
@@ -776,9 +776,9 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                     </div>
                     <button
                       onClick={() => handleDeleteReminder(rem.id)}
-                      className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-rose-600 transition-all p-0.5 rounded cursor-pointer shrink-0"
+                      className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-rose-600 transition-all p-1 hover:bg-stone-50 dark:hover:bg-stone-900 rounded cursor-pointer shrink-0"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ))}
@@ -799,10 +799,10 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
         }`} id="journal-card">
           <div className="flex-1 flex flex-col">
             <div className="flex justify-between items-center mb-2 border-b border-stone-100 dark:border-stone-900 pb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300">
-                <span className={theme === 'natural-tones' ? 'text-[11px] font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>Daily Journal</span>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300">
+                <span className={theme === 'natural-tones' ? 'text-xs font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>Daily Journal</span>
               </h3>
-              <span className="text-[9px] font-mono text-stone-400 dark:text-stone-500">
+              <span className="text-xs font-mono text-stone-400 dark:text-stone-500">
                 {journalSaveStatus === 'saving' && 'Saving diary...'}
                 {journalSaveStatus === 'saved' && 'Saved to diary'}
                 {journalSaveStatus === 'idle' && 'Draft matches cloud'}
@@ -816,13 +816,13 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                 onChange={(e) => handleJournalChange(e.target.value)}
                 placeholder="What happened today? Write down your feelings, discoveries, or details of tea brewed..."
                 rows={7}
-                className="w-full text-[15px] font-sans leading-relaxed text-stone-800 dark:text-stone-200 bg-transparent resize-none focus:outline-none p-1 placeholder-stone-400 dark:placeholder-stone-600"
+                className="w-full text-base sm:text-[17px] font-sans leading-relaxed text-stone-800 dark:text-stone-200 bg-transparent resize-none focus:outline-none p-1 placeholder-stone-400 dark:placeholder-stone-600"
                 style={{
                   backgroundImage: theme === 'natural-tones'
-                    ? 'linear-gradient(transparent, transparent 23px, #E6E1D6 23px, #E6E1D6 24px, transparent 24px)'
-                    : 'linear-gradient(transparent, transparent 23px, #e7e5e4 23px, #e7e5e4 24px, transparent 24px)',
-                  backgroundSize: '100% 24px',
-                  lineHeight: '24px'
+                    ? 'linear-gradient(transparent, transparent 27px, #E6E1D6 27px, #E6E1D6 28px, transparent 28px)'
+                    : 'linear-gradient(transparent, transparent 27px, #e7e5e4 27px, #e7e5e4 28px, transparent 28px)',
+                  backgroundSize: '100% 28px',
+                  lineHeight: '28px'
                 }}
               />
             </div>
@@ -836,15 +836,15 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
             : 'bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800'
         }`} id="expenses-card-ledger">
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2 border-b border-stone-100 dark:border-stone-900 pb-2 flex justify-between items-center">
-              <span className={theme === 'natural-tones' ? 'text-[11px] font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>Expenses Tracker</span>
-              <span className={`text-xs font-serif font-semibold ${theme === 'natural-tones' ? 'text-natural-sage' : 'text-amber-950 dark:text-amber-400'}`}>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2 border-b border-stone-100 dark:border-stone-900 pb-2 flex justify-between items-center">
+              <span className={theme === 'natural-tones' ? 'text-xs font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>Expenses Tracker</span>
+              <span className={`text-sm font-serif font-semibold ${theme === 'natural-tones' ? 'text-natural-sage' : 'text-amber-950 dark:text-amber-400'}`}>
                 Total Spend: NT$ {totalSpending}
               </span>
             </h3>
 
             {/* Ledger entry form */}
-            <form onSubmit={handleAddExpense} className={`mb-4 space-y-2 p-2.5 border rounded-lg ${
+            <form onSubmit={handleAddExpense} className={`mb-4 space-y-2.5 p-3 border rounded-xl ${
               theme === 'natural-tones'
                 ? 'bg-natural-sage-light/40 border-natural-border'
                 : 'bg-stone-50 dark:bg-stone-900/60 border-stone-200/50 dark:border-stone-800'
@@ -855,7 +855,7 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                   placeholder="Amount"
                   value={expenseAmount}
                   onChange={(e) => setExpenseAmount(e.target.value)}
-                  className={`px-2 py-1 text-xs border rounded text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
+                  className={`px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
                     theme === 'natural-tones'
                       ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
                       : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
@@ -865,7 +865,7 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                 <select
                   value={expenseCategory}
                   onChange={(e) => setExpenseCategory(e.target.value)}
-                  className={`px-1.5 py-1 text-xs border rounded text-stone-800 dark:text-stone-100 focus:outline-none font-sans ${
+                  className={`px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none font-sans ${
                     theme === 'natural-tones'
                       ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
                       : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
@@ -886,7 +886,7 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                   placeholder="Note (e.g. Oolong tea can, lunch box)"
                   value={expenseNote}
                   onChange={(e) => setExpenseNote(e.target.value)}
-                  className={`flex-1 px-2.5 py-1 text-xs border rounded text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
+                  className={`flex-1 px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
                     theme === 'natural-tones'
                       ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
                       : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
@@ -894,7 +894,7 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                 />
                 <button
                   type="submit"
-                  className={`px-3.5 text-xs rounded cursor-pointer font-medium transition-colors ${
+                  className={`px-4.5 py-2 text-sm rounded-lg cursor-pointer font-medium transition-colors shrink-0 ${
                     theme === 'natural-tones'
                       ? 'bg-natural-sage text-white hover:bg-natural-sage/90 border border-transparent'
                       : 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-950 hover:bg-stone-900'
@@ -907,38 +907,38 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
 
             {/* Ledger logs list */}
             {dayExpenses.length === 0 ? (
-              <p className="text-xs text-stone-400 dark:text-stone-500 italic py-6 text-center">
+              <p className="text-sm text-stone-400 dark:text-stone-500 italic py-6 text-center">
                 No expenditures recorded
               </p>
             ) : (
-              <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-[140px] overflow-y-auto pr-1">
                 {dayExpenses.map((ex) => (
                   <div
                     key={ex.id}
-                    className={`group flex justify-between items-center py-1.5 px-2 border rounded transition-all text-[11px] ${
+                    className={`group flex justify-between items-center py-2 px-2 border rounded-lg transition-all text-sm ${
                       theme === 'natural-tones'
                         ? 'bg-natural-sage-light border-natural-sage-border/40 hover:border-natural-sage'
                         : 'bg-stone-50/50 dark:bg-stone-900/20 border-stone-100 dark:border-stone-900/50 hover:border-amber-100 dark:hover:border-amber-900/20'
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-stone-800 dark:text-stone-200 text-xs shrink-0">
+                    <div className="flex items-center gap-2.5">
+                      <span className="font-mono font-bold text-stone-800 dark:text-stone-200 text-sm shrink-0">
                         NT$ {ex.amount}
                       </span>
-                      <span className={`px-1.5 rounded text-[9px] font-mono ${
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-sans font-medium uppercase tracking-wider ${
                         theme === 'natural-tones'
-                          ? 'bg-natural-tag-bg text-natural-tag-text uppercase tracking-wider'
+                          ? 'bg-natural-tag-bg text-natural-tag-text'
                           : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
                       }`}>
                         {ex.category}
                       </span>
-                      <span className="text-stone-500 dark:text-stone-400 truncate max-w-[120px] font-sans">
+                      <span className="text-stone-600 dark:text-stone-400 truncate max-w-[150px] font-sans">
                         {ex.note}
                       </span>
                     </div>
                     <button
                       onClick={() => handleDeleteExpense(ex.id)}
-                      className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-rose-600 transition-all p-0.5 rounded cursor-pointer"
+                      className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-rose-600 transition-all p-1 hover:bg-stone-50 dark:hover:bg-stone-900 rounded cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -948,22 +948,20 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
             )}
           </div>
         </div>
-      </div>
-
-      {/* SECTION 4: BRAIN DUMP */}
+      </div>      {/* SECTION 4: BRAIN DUMP */}
       <div className={`p-5 ${
         theme === 'natural-tones'
           ? 'bg-white border border-natural-border rounded-[24px] shadow-2xs'
           : 'bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800'
       }`} id="braindump-card">
         <div className="flex justify-between items-center mb-3 border-b border-stone-100 dark:border-stone-900 pb-2">
-          <div className="flex items-center gap-1.5">
-            <Sparkles className={`w-4 h-4 ${theme === 'natural-tones' ? 'text-natural-sage' : 'text-amber-800 dark:text-amber-500'}`} />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300">
-              <span className={theme === 'natural-tones' ? 'text-[11px] font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>AI Brain Dump & Sort</span>
+          <div className="flex items-center gap-2">
+            <Sparkles className={`w-4.5 h-4.5 ${theme === 'natural-tones' ? 'text-natural-sage' : 'text-amber-800 dark:text-amber-500'}`} />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300">
+              <span className={theme === 'natural-tones' ? 'text-xs font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>AI Brain Dump & Sort</span>
             </h3>
           </div>
-          <span className="text-[9px] font-mono text-stone-400 dark:text-stone-500">
+          <span className="text-xs font-mono text-stone-400 dark:text-stone-500">
             {aiProcessing ? (
               <span className="animate-pulse text-amber-700 dark:text-amber-400 font-bold">AI is parsing & sorting...</span>
             ) : (
@@ -982,76 +980,76 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
           disabled={aiProcessing}
           placeholder="Pour your busy thoughts here: e.g. 'Log NT$ 150 spent on high-mountain Oolong tea. Remind me to review travel options to Kyoto tomorrow at 3pm, and CS assignment. I always prefer Oolong tea over green tea.'"
           rows={5}
-          className="w-full text-xs font-mono leading-relaxed text-stone-700 dark:text-stone-300 bg-transparent resize-none focus:outline-none p-1 placeholder-stone-400 dark:placeholder-stone-600 disabled:opacity-50"
+          className="w-full text-sm font-mono leading-relaxed text-stone-700 dark:text-stone-300 bg-transparent resize-none focus:outline-none p-1 placeholder-stone-400 dark:placeholder-stone-600 disabled:opacity-50"
         />
 
         {/* Action button toolbar */}
         <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-3 border-t border-dashed border-stone-100 dark:border-stone-900 mt-2">
-          <p className="text-[10px] text-stone-400 dark:text-stone-500 leading-normal max-w-sm font-sans">
+          <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed max-w-sm font-sans">
             AI automatically maps unstructured text to schedules, tag lists, journals, and expense ledgers.
           </p>
           <button
             onClick={handleOrganizeWithAI}
             disabled={aiProcessing || !dayBrainDump.trim()}
-            className={`px-4 py-1.5 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
+            className={`px-5 py-2.5 text-sm font-bold rounded-lg flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
               theme === 'natural-tones'
                 ? 'bg-natural-sage text-white hover:bg-natural-sage/90 shadow-2xs disabled:bg-stone-100 disabled:text-stone-400'
                 : 'bg-stone-800 hover:bg-stone-900 text-white dark:bg-stone-200 dark:text-stone-950 dark:hover:bg-stone-100 disabled:opacity-40'
             } disabled:cursor-not-allowed`}
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-4 h-4" />
             <span>{aiProcessing ? 'Processing...' : 'Organize with AI'}</span>
           </button>
         </div>
 
         {/* AI Error display */}
         {aiError && (
-          <div className="mt-3 p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 text-rose-700 dark:text-rose-400 text-xs flex gap-1.5 items-center font-sans">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="mt-3 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 text-rose-700 dark:text-rose-400 text-sm flex gap-1.5 items-center font-sans">
+            <AlertCircle className="w-4.5 h-4.5 shrink-0" />
             <span>{aiError}</span>
           </div>
         )}
 
         {/* AI Success report */}
         {aiResultSummary && (
-          <div className={`mt-3 p-3 rounded-lg border flex flex-col gap-2 font-sans ${
+          <div className={`mt-3 p-3.5 rounded-lg border flex flex-col gap-2 font-sans ${
             theme === 'natural-tones'
               ? 'bg-natural-sage-light/40 border-natural-border/60'
               : 'bg-emerald-50/50 dark:bg-emerald-950/10 border-emerald-100/20 dark:border-emerald-900/10'
           }`}>
-            <h4 className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <h4 className="text-sm font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+              <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
               AI Successfully Sorted Your Thoughts!
             </h4>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-[10px] font-mono text-stone-600 dark:text-stone-400">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs font-mono text-stone-600 dark:text-stone-400">
               {aiResultSummary.eventsAdded > 0 && (
-                <span className="bg-white dark:bg-stone-900 p-1 rounded border">
+                <span className="bg-white dark:bg-stone-900 p-1.5 rounded border text-center">
                   📅 {aiResultSummary.eventsAdded} Event(s)
                 </span>
               )}
               {aiResultSummary.tasksAdded > 0 && (
-                <span className="bg-white dark:bg-stone-900 p-1 rounded border">
+                <span className="bg-white dark:bg-stone-900 p-1.5 rounded border text-center">
                   ✓ {aiResultSummary.tasksAdded} Task(s)
                 </span>
               )}
               {aiResultSummary.remindersAdded > 0 && (
-                <span className="bg-white dark:bg-stone-900 p-1 rounded border">
+                <span className="bg-white dark:bg-stone-900 p-1.5 rounded border text-center">
                   🔔 {aiResultSummary.remindersAdded} Goal(s)
                 </span>
               )}
               {aiResultSummary.expensesAdded > 0 && (
-                <span className="bg-white dark:bg-stone-900 p-1 rounded border">
+                <span className="bg-white dark:bg-stone-900 p-1.5 rounded border text-center">
                   💰 {aiResultSummary.expensesAdded} Expense(s)
                 </span>
               )}
               {aiResultSummary.journalsAdded > 0 && (
-                <span className="bg-white dark:bg-stone-900 p-1 rounded border">
+                <span className="bg-white dark:bg-stone-900 p-1.5 rounded border text-center">
                   ✍ {aiResultSummary.journalsAdded} Journal(s)
                 </span>
               )}
             </div>
             {aiResultSummary.preferencesRemembered && (
-              <p className="text-[10px] text-stone-500 italic mt-1 font-sans border-t pt-1.5 border-dashed border-stone-100">
+              <p className="text-xs text-stone-550 dark:text-stone-450 italic mt-1 font-sans border-t pt-1.5 border-dashed border-stone-100">
                 💡 Remembered preference: "{aiResultSummary.preferencesRemembered}"
               </p>
             )}
@@ -1060,9 +1058,9 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
 
         {/* Stored Preferences Section */}
         {state.preferences && (
-          <div className="mt-4 p-3 bg-stone-50 dark:bg-stone-900/20 border border-stone-200/50 dark:border-stone-800/80 rounded-xl font-sans">
+          <div className="mt-4 p-3.5 bg-stone-50 dark:bg-stone-900/20 border border-stone-200/50 dark:border-stone-800/80 rounded-xl font-sans">
             <div className="flex justify-between items-center mb-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 font-mono">
+              <span className="text-xs font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 font-mono">
                 AI Remembered Preferences
               </span>
               <button
@@ -1071,12 +1069,12 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                     onUpdateState(prev => ({ ...prev, preferences: undefined }));
                   }
                 }}
-                className="text-[9px] font-mono text-rose-600 hover:underline cursor-pointer"
+                className="text-xs font-mono text-rose-600 hover:underline cursor-pointer"
               >
                 Reset Preferences
               </button>
             </div>
-            <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed bg-white dark:bg-stone-950/40 p-2 rounded border border-stone-100 dark:border-stone-900 font-mono">
+            <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed bg-white dark:bg-stone-950/40 p-3 rounded-lg border border-stone-100 dark:border-stone-900 font-mono">
               {state.preferences}
             </p>
           </div>
