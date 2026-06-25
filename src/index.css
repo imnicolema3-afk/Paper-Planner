@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-natural-bg: #F7F5F2;
+  --color-natural-text: #4A463F;
+  --color-natural-card: #FFFFFF;
+  --color-natural-border: #E6E1D6;
+  --color-natural-sage: #8B9D83;
+  --color-natural-sage-light: #FAF9F6;
+  --color-natural-sage-border: #F0EDE6;
+  --color-natural-muted: #A8A49C;
+  --color-natural-checkbox-border: #D1CDC2;
+  --color-natural-tag-bg: #F0EDE6;
+  --color-natural-tag-text: #8C8A82;
+  --color-natural-dark-bg: #2C2A26;
+}
+
+/* Custom fade-in animation and transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}

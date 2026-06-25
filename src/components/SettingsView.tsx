@@ -1,0 +1,268 @@
+import React from 'react';
+import { Settings, Moon, Sun, RotateCcw, Download, Upload, Trash2, Heart, ExternalLink, RefreshCw, Cloud, LogOut } from 'lucide-react';
+import { ThemeType, PlannerState } from '../types';
+import { generateInitialData } from '../data/initialData';
+
+interface SettingsViewProps {
+  theme: ThemeType;
+  onChangeTheme: (theme: ThemeType) => void;
+  state: PlannerState;
+  onUpdateState: (updater: (prev: PlannerState) => PlannerState) => void;
+  userEmail: string | null;
+  onLogout: () => void;
+}
+
+export default function SettingsView({ theme, onChangeTheme, state, onUpdateState, userEmail, onLogout }: SettingsViewProps) {
+  // Reset database to initial sample data
+  const handleRestoreSampleData = () => {
+    if (window.confirm('This will populate sample entries for today, yesterday, and past days. Any custom modifications will be preserved or merged. Proceed?')) {
+      onUpdateState(() => generateInitialData());
+    }
+  };
+
+  // Clear all database entries
+  const handleClearAllData = () => {
+    if (window.confirm('WARNING: This will permanently erase all your tasks, expenses, schedules, journals, and reminders! This action cannot be undone. Proceed?')) {
+      onUpdateState(() => ({
+        events: [],
+        tasks: [],
+        reminders: [],
+        journals: [],
+        expenses: [],
+        brainDumps: []
+      }));
+    }
+  };
+
+  // Export data as JSON file download
+  const handleExportData = () => {
+    const dataStr = JSON.stringify(state, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `paper_planner_backup_${new Date().toISOString().slice(0,10)}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  // Import data from JSON file upload
+  const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileReader = new FileReader();
+    if (e.target.files && e.target.files[0]) {
+      fileReader.readAsText(e.target.files[0], "UTF-8");
+      fileReader.onload = (event) => {
+        try {
+          const parsed = JSON.parse(event.target?.result as string);
+          if (parsed && typeof parsed === 'object') {
+            onUpdateState((prev) => ({
+              events: Array.isArray(parsed.events) ? parsed.events : prev.events,
+              tasks: Array.isArray(parsed.tasks) ? parsed.tasks : prev.tasks,
+              reminders: Array.isArray(parsed.reminders) ? parsed.reminders : prev.reminders,
+              journals: Array.isArray(parsed.journals) ? parsed.journals : prev.journals,
+              expenses: Array.isArray(parsed.expenses) ? parsed.expenses : prev.expenses,
+              brainDumps: Array.isArray(parsed.brainDumps) ? parsed.brainDumps : prev.brainDumps,
+            }));
+            alert('Planner logs imported successfully!');
+          } else {
+            alert('Invalid backup file format.');
+          }
+        } catch (err) {
+          alert('Error parsing JSON backup file.');
+        }
+      };
+    }
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto py-2 px-1 animate-fade-in" id="settings-view-root">
+      {/* Header */}
+      <div className="border-b border-stone-200 dark:border-stone-800 pb-5 mb-8">
+        <div className="flex items-center gap-3">
+          <Settings className="w-5.5 h-5.5 text-stone-700 dark:text-stone-300" />
+          <div>
+            <h2 className="text-xl font-serif font-medium text-stone-800 dark:text-stone-100">
+              Planner Preferences
+            </h2>
+            <p className="text-[10px] font-mono text-stone-400 dark:text-stone-500 uppercase tracking-wider">
+              Configure paper styling, backups, and database purges
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        {/* CLOUD WORKSPACE CARD */}
+        <div className={`p-5 rounded-xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
+          theme === 'natural-tones'
+            ? 'bg-natural-sage-light/25 border-natural-border/60 rounded-[24px]'
+            : 'bg-stone-50 dark:bg-stone-900/40 border-stone-200 dark:border-stone-800'
+        }`} id="cloud-account-card">
+          <div className="flex gap-3">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+              theme === 'natural-tones' ? 'bg-natural-sage/20 text-natural-sage' : 'bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300'
+            }`}>
+              <Cloud className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-stone-850 dark:text-stone-100 font-sans">
+                {userEmail ? "Firebase Cloud Backup" : "Local-Only Offline Guest Mode"}
+              </h3>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 font-sans">
+                {userEmail 
+                  ? `Active account: ${userEmail} • Your planner logs are securely backed up in the cloud.`
+                  : "All logs are stored purely in your tablet browser. Create or log in to a cloud account to prevent loss."
+                }
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onLogout}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
+              theme === 'natural-tones'
+                ? 'bg-natural-sage text-white hover:bg-natural-sage/90'
+                : 'bg-stone-800 hover:bg-stone-900 text-white dark:bg-stone-200 dark:text-stone-950 dark:hover:bg-stone-100'
+            }`}
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>{userEmail ? "Sign Out & Switch Account" : "Access Cloud & Log In"}</span>
+          </button>
+        </div>
+
+        {/* THEME SELECTOR CARD */}
+        <div className="p-5 bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-4">
+            Parchment Theme Presets
+          </h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              {
+                id: 'natural-tones',
+                name: 'Natural Tones',
+                desc: 'Sage green accents on soft warm paper. Inspired by Japanese organic stationery and quiet gardens.',
+                colorBg: 'bg-natural-bg',
+                colorBorder: 'border-natural-border',
+                textColor: 'text-natural-text'
+              },
+              {
+                id: 'warm-paper',
+                name: 'Warm Moleskine',
+                desc: 'Ivory tinted warm paper with charcoal text and brown accents. Replicates premium sketchbooks.',
+                colorBg: 'bg-[#faf6f0]',
+                colorBorder: 'border-[#eae1d4]',
+                textColor: 'text-stone-800'
+              },
+              {
+                id: 'slate-clean',
+                name: 'Slate Minimal',
+                desc: 'Swiss architectural grid mode. Clean white canvas, crisp gray outlines and structured fonts.',
+                colorBg: 'bg-white',
+                colorBorder: 'border-stone-200',
+                textColor: 'text-stone-800'
+              },
+              {
+                id: 'charcoal-dark',
+                name: 'Charcoal Nocturne',
+                desc: 'Eye-safe dark parchment mode. Deep slate-charcoal canvas with muted soft cream highlights.',
+                colorBg: 'bg-[#1c1b19]',
+                colorBorder: 'border-[#2d2c29]',
+                textColor: 'text-[#d6cbb5]'
+              }
+            ].map((preset) => (
+              <button
+                key={preset.id}
+                onClick={() => onChangeTheme(preset.id as ThemeType)}
+                className={`p-4 rounded-xl border text-left flex flex-col justify-between h-[155px] transition-all cursor-pointer hover:shadow-sm ${preset.colorBg} ${preset.colorBorder} ${
+                  theme === preset.id
+                    ? preset.id === 'natural-tones'
+                      ? 'ring-2 ring-natural-sage scale-[1.02]'
+                      : 'ring-2 ring-amber-600 dark:ring-amber-500 scale-[1.02]'
+                    : 'opacity-70 hover:opacity-100'
+                }`}
+              >
+                <div>
+                  <h4 className={`text-xs font-semibold ${preset.textColor}`}>
+                    {preset.name}
+                  </h4>
+                  <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-2 leading-relaxed">
+                    {preset.desc}
+                  </p>
+                </div>
+                <div className={`text-[10px] font-mono ${preset.textColor} flex items-center justify-between border-t border-dashed ${preset.colorBorder} pt-2 mt-2 w-full`}>
+                  <span>{theme === preset.id ? '● Active' : 'Select'}</span>
+                  <span>{preset.id === 'charcoal-dark' ? 'Dark' : 'Light'}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+        </div>
+
+        {/* DATA UTILITIES CARD */}
+        <div className="p-5 bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-4">
+            Data Ledger & Backups
+          </h3>
+          <p className="text-xs text-stone-600 dark:text-stone-400 mb-4 leading-relaxed">
+            All database entries (tasks, journals, reminders, expenses, events) are cached securely on your device's browser database. 
+            You can download backups or restore standard presets for testing at any time.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" id="settings-data-actions">
+            {/* Backup/Restore Buttons */}
+            <button
+              onClick={handleExportData}
+              className="flex items-center justify-center gap-2 px-4 py-2 text-xs border border-stone-200 dark:border-stone-800 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-900 text-stone-700 dark:text-stone-300 transition-colors cursor-pointer"
+            >
+              <Download className="w-4 h-4 text-amber-700 dark:text-amber-500" />
+              <span>Export backup JSON</span>
+            </button>
+
+            <label className="flex items-center justify-center gap-2 px-4 py-2 text-xs border border-stone-200 dark:border-stone-800 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-900 text-stone-700 dark:text-stone-300 transition-colors cursor-pointer">
+              <Upload className="w-4 h-4 text-emerald-700 dark:text-emerald-500" />
+              <span>Import backup JSON</span>
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImportData}
+                className="hidden"
+              />
+            </label>
+
+            <button
+              onClick={handleRestoreSampleData}
+              className="flex items-center justify-center gap-2 px-4 py-2 text-xs border border-stone-200 dark:border-stone-800 rounded-lg hover:bg-amber-50/50 dark:hover:bg-amber-950/20 text-stone-700 dark:text-stone-300 transition-colors cursor-pointer"
+            >
+              <RefreshCw className="w-4 h-4 text-amber-600" />
+              <span>Restore Demo Data</span>
+            </button>
+
+            <button
+              onClick={handleClearAllData}
+              className="flex items-center justify-center gap-2 px-4 py-2 text-xs border border-stone-200 dark:border-stone-800 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-700 dark:text-rose-400 transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4 text-rose-600" />
+              <span>Wipe database clean</span>
+            </button>
+          </div>
+        </div>
+
+        {/* INFO ABOUT COGNITIVE LOAD CARD */}
+        <div className="p-5 bg-amber-50/20 dark:bg-amber-950/10 border border-amber-100 dark:border-amber-900/30 rounded-xl space-y-2">
+          <h4 className="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">
+            <Heart className="w-3.5 h-3.5 fill-amber-700/20" />
+            Product Design Core Intent
+          </h4>
+          <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
+            This workspace was created specifically to escape the noise of notifications, gamified points, streak badges, 
+            and complex hierarchies. It is not designed to help you cram more work into a day, 
+            but to offer a calm visual space to reflect on what is done, write down what happened, 
+            and track small everyday moments.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}

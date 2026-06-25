@@ -1,0 +1,12 @@
+{
+  "collections": {
+    "users": {
+      "schema": {
+        "userId": "string",
+        "email": "string",
+        "theme": "string",
+        "createdAt": "timestamp"
+      }
+    }
+  }
+}

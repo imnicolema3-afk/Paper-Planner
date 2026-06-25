@@ -1,0 +1,6 @@
+{
+  "name": "Paper Planner",
+  "description": "A minimalist, iPad-optimized, paper-like life planner featuring a today view, calendar, history tracking, insights, and technical specifications.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
