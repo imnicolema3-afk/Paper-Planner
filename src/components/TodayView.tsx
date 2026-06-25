@@ -990,7 +990,6 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                     </button>
                   </div>
                 ))}
-
               </div>
             )}
           </div>
@@ -1006,17 +1005,32 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
             : 'bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800'
         }`} id="journal-card">
           <div className="flex-1 flex flex-col">
-            <div className="flex justify-between items-center mb-2 border-b border-stone-100 dark:border-stone-900 pb-2">
+            <div className="flex justify-between items-center mb-2 border-b border-stone-100 dark:border-stone-900 pb-2 flex-wrap gap-2">
               <h3 className="text-sm font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300">
                 <span className={theme === 'natural-tones' ? 'text-xs font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>
                   {translations[language]['today.daily_journal']}
                 </span>
               </h3>
-              <span className="text-xs font-mono text-stone-400 dark:text-stone-500">
-                {journalSaveStatus === 'saving' && translations[language]['today.journal_saving']}
-                {journalSaveStatus === 'saved' && translations[language]['today.journal_saved']}
-                {journalSaveStatus === 'idle' && translations[language]['today.journal_idle']}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono text-stone-400 dark:text-stone-500">
+                  {journalSaveStatus === 'saving' && translations[language]['today.journal_saving']}
+                  {journalSaveStatus === 'saved' && translations[language]['today.journal_saved']}
+                  {journalSaveStatus === 'idle' && translations[language]['today.journal_idle']}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleOrganizeWithAI}
+                  disabled={aiProcessing || !dayJournal.trim()}
+                  className={`text-xs px-2.5 py-1 rounded-lg border font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                    theme === 'natural-tones'
+                      ? 'border-natural-border bg-white text-natural-sage hover:bg-natural-sage-light'
+                      : 'border-stone-200 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-900 text-stone-600 dark:text-stone-400'
+                  } disabled:opacity-45 disabled:cursor-not-allowed`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-natural-sage" />
+                  <span>{language === 'zh-TW' ? 'AI 智慧整理與優化' : 'AI Organize & Improve'}</span>
+                </button>
+              </div>
             </div>
 
             {/* Notepad area */}
@@ -1025,7 +1039,7 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                 value={dayJournal}
                 onChange={(e) => handleJournalChange(e.target.value)}
                 placeholder={translations[language]['today.placeholder_journal']}
-                rows={7}
+                rows={10}
                 className="w-full text-base sm:text-[17px] font-sans leading-relaxed text-stone-800 dark:text-stone-200 bg-transparent resize-none focus:outline-none p-1 placeholder-stone-400 dark:placeholder-stone-600"
                 style={{
                   backgroundImage: theme === 'natural-tones'
@@ -1036,6 +1050,88 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                 }}
               />
             </div>
+
+            {/* AI Error / Success status inside the Journal card */}
+            {aiProcessing && (
+              <div className="mt-3 text-xs font-mono text-amber-600 dark:text-amber-400 animate-pulse flex items-center gap-1.5 border-t border-stone-100 dark:border-stone-900 pt-2">
+                <span className="flex h-2 w-2 relative shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                </span>
+                <span>{language === 'zh-TW' ? 'AI 正在分析日程、分類記帳並優化日記內容...' : 'AI is analyzing schedule, parsing ledger & polishing text...'}</span>
+              </div>
+            )}
+
+            {aiError && (
+              <div className="mt-3 p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 text-rose-700 dark:text-rose-400 text-xs flex gap-1.5 items-center font-sans">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{aiError}</span>
+              </div>
+            )}
+
+            {aiResultSummary && (
+              <div className={`mt-3 p-3 rounded-xl border flex flex-col gap-2 font-sans ${
+                theme === 'natural-tones'
+                  ? 'bg-natural-sage-light/40 border-natural-border/60'
+                  : 'bg-emerald-50/50 dark:bg-emerald-950/10 border-emerald-100/20 dark:border-emerald-900/10'
+              }`}>
+                <h4 className="text-xs font-bold text-stone-850 dark:text-stone-150 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  {language === 'zh-TW' ? 'AI 智慧優化與自動分類完成！' : 'AI Polishing & Categorization Complete!'}
+                </h4>
+                <div className="flex flex-wrap gap-1.5 text-[11px] font-mono text-stone-600 dark:text-stone-400">
+                  {aiResultSummary.journalsAdded > 0 && (
+                    <span className="bg-white dark:bg-stone-900 px-2 py-0.5 rounded border text-center font-bold text-emerald-600 dark:text-emerald-400">
+                      ✍ {language === 'zh-TW' ? '已潤飾日記' : 'Polished Diary'}
+                    </span>
+                  )}
+                  {aiResultSummary.eventsAdded > 0 && (
+                    <span className="bg-white dark:bg-stone-900 px-2 py-0.5 rounded border text-center">
+                      📅 +{aiResultSummary.eventsAdded} {translations[language]['today.event_count']}
+                    </span>
+                  )}
+                  {aiResultSummary.tasksAdded > 0 && (
+                    <span className="bg-white dark:bg-stone-900 px-2 py-0.5 rounded border text-center">
+                      ✓ +{aiResultSummary.tasksAdded} {translations[language]['today.task_count']}
+                    </span>
+                  )}
+                  {aiResultSummary.remindersAdded > 0 && (
+                    <span className="bg-white dark:bg-stone-900 px-2 py-0.5 rounded border text-center">
+                      🔔 +{aiResultSummary.remindersAdded} {translations[language]['today.goal_count']}
+                    </span>
+                  )}
+                  {aiResultSummary.expensesAdded > 0 && (
+                    <span className="bg-white dark:bg-stone-900 px-2 py-0.5 rounded border text-center font-bold text-rose-600 dark:text-rose-400">
+                      💰 +{aiResultSummary.expensesAdded} {translations[language]['today.expense_count']}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Stored Preferences Section */}
+            {state.preferences && (
+              <div className="mt-3 p-3 bg-stone-50 dark:bg-stone-900/20 border border-stone-200/50 dark:border-stone-800/80 rounded-xl font-sans">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-stone-550 font-mono">
+                    {translations[language]['today.ai_remembered']}
+                  </span>
+                  <button
+                    onClick={() => {
+                      if (window.confirm("Do you want to clear AI remembered preferences?")) {
+                        onUpdateState(prev => ({ ...prev, preferences: undefined }));
+                      }
+                    }}
+                    className="text-[10px] font-mono text-rose-600 hover:underline cursor-pointer"
+                  >
+                    {translations[language]['today.reset_preferences']}
+                  </button>
+                </div>
+                <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed bg-white dark:bg-stone-950/40 p-2 rounded border border-stone-100 dark:border-stone-900 font-mono">
+                  {state.preferences}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1046,7 +1142,7 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
             : 'bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800'
         }`} id="expenses-card-ledger">
           <div>
-            <div className="flex justify-between items-center mb-3 border-b border-stone-100 dark:border-stone-900 pb-2">
+            <div className="flex justify-between items-center mb-3.5 border-b border-stone-100 dark:border-stone-900 pb-2">
               <h3 className="text-sm font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300">
                 <span className={theme === 'natural-tones' ? 'text-xs font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>
                   {translations[language]['today.expenses_tracker']}
@@ -1066,184 +1162,104 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
               </button>
             </div>
 
-            {/* Total cards summary */}
-            <div className="grid grid-cols-3 gap-2 mb-3.5">
-              <div className="p-2 bg-stone-105/40 dark:bg-stone-900/40 rounded-lg border border-stone-200/40 dark:border-stone-800/40 text-center">
-                <span className="block text-[10px] font-mono text-stone-400 dark:text-stone-500 uppercase">
-                  {language === 'zh-TW' ? '總支出' : 'Total Exp'}
-                </span>
-                <span className="text-sm font-bold text-rose-600 dark:text-rose-450">
-                  NT$ {totalExpenses}
-                </span>
+            {/* Detailed Manual Ledger Form rendered directly */}
+            <form onSubmit={handleAddExpense} className={`mb-3.5 space-y-2.5 p-3.5 border rounded-xl ${
+              theme === 'natural-tones'
+                ? 'bg-natural-sage-light/40 border-natural-border'
+                : 'bg-stone-50 dark:bg-stone-900/60 border-stone-200/50 dark:border-stone-800'
+            }`}>
+              {/* Type selector toggle */}
+              <div className="flex gap-1 border border-stone-250 dark:border-stone-800 rounded-lg p-0.5 bg-white dark:bg-stone-950 overflow-hidden shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => setExpenseType('expense')}
+                  className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                    expenseType === 'expense'
+                      ? theme === 'natural-tones'
+                        ? 'bg-natural-sage text-white'
+                        : 'bg-stone-800 dark:bg-stone-200 text-white dark:text-stone-950'
+                      : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+                  }`}
+                >
+                  {translations[language]['today.type_expense']}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setExpenseType('income')}
+                  className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                    expenseType === 'income'
+                      ? theme === 'natural-tones'
+                        ? 'bg-natural-sage text-white'
+                        : 'bg-natural-sage/10 text-natural-sage border border-natural-sage-border'
+                      : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+                  }`}
+                >
+                  {translations[language]['today.type_income']}
+                </button>
               </div>
-              <div className="p-2 bg-stone-105/40 dark:bg-stone-900/40 rounded-lg border border-stone-200/40 dark:border-stone-800/40 text-center">
-                <span className="block text-[10px] font-mono text-stone-400 dark:text-stone-500 uppercase">
-                  {language === 'zh-TW' ? '總收入' : 'Total Inc'}
-                </span>
-                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-450">
-                  NT$ {totalIncome}
-                </span>
-              </div>
-              <div className="p-2 bg-stone-105/40 dark:bg-stone-900/40 rounded-lg border border-stone-200/40 dark:border-stone-800/40 text-center">
-                <span className="block text-[10px] font-mono text-stone-400 dark:text-stone-500 uppercase">
-                  {language === 'zh-TW' ? '結餘' : 'Balance'}
-                </span>
-                <span className={`text-sm font-bold ${netBalance >= 0 ? 'text-emerald-600 dark:text-emerald-450' : 'text-rose-600 dark:text-rose-450'}`}>
-                  NT$ {netBalance}
-                </span>
-              </div>
-            </div>
 
-            {/* Smart Voice-Like Chatbox entry */}
-            <form onSubmit={handleSmartExpenseSubmit} className="mb-3">
-              <div className="flex gap-1.5">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    value={smartExpenseInput}
-                    onChange={(e) => setSmartExpenseInput(e.target.value)}
-                    placeholder={translations[language]['today.smart_input_placeholder']}
-                    disabled={isParsingSmartExpense}
-                    className={`w-full px-3 py-2 pr-8 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
-                      theme === 'natural-tones'
-                        ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
-                        : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
-                    }`}
-                  />
-                  {isParsingSmartExpense && (
-                    <span className="absolute right-2.5 top-3 flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                    </span>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="number"
+                  placeholder={translations[language]['today.amount']}
+                  value={expenseAmount}
+                  onChange={(e) => setExpenseAmount(e.target.value)}
+                  className={`px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
+                    theme === 'natural-tones'
+                      ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
+                      : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
+                  }`}
+                  required
+                />
+                <select
+                  value={expenseCategory}
+                  onChange={(e) => setExpenseCategory(e.target.value)}
+                  className={`px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none font-sans ${
+                    theme === 'natural-tones'
+                      ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
+                      : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
+                  }`}
+                >
+                  {expenseType === 'expense' ? (
+                    expenseCategories.map(cat => (
+                      <option key={cat} value={cat}>
+                        {translations[language][`category.${cat}`]}
+                      </option>
+                    ))
+                  ) : (
+                    incomeCategories.map(cat => (
+                      <option key={cat} value={cat}>
+                        {translations[language][`category.${cat}`]}
+                      </option>
+                    ))
                   )}
-                </div>
+                </select>
+              </div>
+
+              <div className="flex gap-1.5">
+                <input
+                  type="text"
+                  placeholder={translations[language]['today.note']}
+                  value={expenseNote}
+                  onChange={(e) => setExpenseNote(e.target.value)}
+                  className={`flex-1 px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
+                    theme === 'natural-tones'
+                      ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
+                      : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
+                  }`}
+                />
                 <button
                   type="submit"
-                  disabled={isParsingSmartExpense || !smartExpenseInput.trim()}
-                  className={`px-3 py-2 text-sm rounded-lg font-bold flex items-center justify-center gap-1 cursor-pointer shrink-0 transition-all ${
+                  className={`px-4.5 py-2 text-sm rounded-lg cursor-pointer font-medium transition-colors shrink-0 ${
                     theme === 'natural-tones'
-                      ? 'bg-natural-sage text-white hover:bg-natural-sage/90 disabled:bg-stone-100 disabled:text-stone-400'
-                      : 'bg-stone-800 hover:bg-stone-900 text-white dark:bg-stone-200 dark:text-stone-950 dark:hover:bg-stone-100 disabled:opacity-40'
-                  } disabled:cursor-not-allowed`}
+                      ? 'bg-natural-sage text-white hover:bg-natural-sage/90 border border-transparent'
+                      : 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-950 hover:bg-stone-900'
+                  }`}
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>{translations[language]['today.smart_quick_log']}</span>
+                  {translations[language]['today.save']}
                 </button>
               </div>
             </form>
-
-            {/* Manual Form Toggle */}
-            <div className="mb-3 flex justify-center">
-              <button
-                type="button"
-                onClick={() => setShowManualExpenseForm(!showManualExpenseForm)}
-                className="text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 font-medium flex items-center gap-1 transition-all cursor-pointer py-1 px-2 rounded hover:bg-stone-100/40 dark:hover:bg-stone-900/40"
-              >
-                {showManualExpenseForm ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                <span>{language === 'zh-TW' ? '手動詳細記帳' : 'Detailed Manual Log'}</span>
-              </button>
-            </div>
-
-            {/* Collapsible Manual Ledger Form */}
-            {showManualExpenseForm && (
-              <form onSubmit={handleAddExpense} className={`mb-3.5 space-y-2.5 p-3 border rounded-xl animate-fadeIn ${
-                theme === 'natural-tones'
-                  ? 'bg-natural-sage-light/40 border-natural-border'
-                  : 'bg-stone-50 dark:bg-stone-900/60 border-stone-200/50 dark:border-stone-800'
-              }`}>
-                {/* Type selector toggle */}
-                <div className="flex gap-1 border border-stone-250 dark:border-stone-800 rounded-lg p-0.5 bg-white dark:bg-stone-950 overflow-hidden shadow-2xs">
-                  <button
-                    type="button"
-                    onClick={() => setExpenseType('expense')}
-                    className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                      expenseType === 'expense'
-                        ? theme === 'natural-tones'
-                          ? 'bg-natural-sage text-white'
-                          : 'bg-stone-800 dark:bg-stone-200 text-white dark:text-stone-950'
-                        : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
-                    }`}
-                  >
-                    {translations[language]['today.type_expense']}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setExpenseType('income')}
-                    className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                      expenseType === 'income'
-                        ? theme === 'natural-tones'
-                          ? 'bg-natural-sage text-white'
-                          : 'bg-natural-sage/10 text-natural-sage border border-natural-sage-border'
-                        : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
-                    }`}
-                  >
-                    {translations[language]['today.type_income']}
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="number"
-                    placeholder={translations[language]['today.amount']}
-                    value={expenseAmount}
-                    onChange={(e) => setExpenseAmount(e.target.value)}
-                    className={`px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
-                      theme === 'natural-tones'
-                        ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
-                        : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
-                    }`}
-                    required
-                  />
-                  <select
-                    value={expenseCategory}
-                    onChange={(e) => setExpenseCategory(e.target.value)}
-                    className={`px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none font-sans ${
-                      theme === 'natural-tones'
-                        ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
-                        : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
-                    }`}
-                  >
-                    {expenseType === 'expense' ? (
-                      expenseCategories.map(cat => (
-                        <option key={cat} value={cat}>
-                          {translations[language][`category.${cat}`]}
-                        </option>
-                      ))
-                    ) : (
-                      incomeCategories.map(cat => (
-                        <option key={cat} value={cat}>
-                          {translations[language][`category.${cat}`]}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                </div>
-
-                <div className="flex gap-1.5">
-                  <input
-                    type="text"
-                    placeholder={translations[language]['today.note']}
-                    value={expenseNote}
-                    onChange={(e) => setExpenseNote(e.target.value)}
-                    className={`flex-1 px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
-                      theme === 'natural-tones'
-                        ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
-                        : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
-                    }`}
-                  />
-                  <button
-                    type="submit"
-                    className={`px-4.5 py-2 text-sm rounded-lg cursor-pointer font-medium transition-colors shrink-0 ${
-                      theme === 'natural-tones'
-                        ? 'bg-natural-sage text-white hover:bg-natural-sage/90 border border-transparent'
-                        : 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-950 hover:bg-stone-900'
-                    }`}
-                  >
-                    {translations[language]['today.save']}
-                  </button>
-                </div>
-              </form>
-            )}
 
             {/* Ledger logs list */}
             {dayExpenses.length === 0 ? (
@@ -1251,7 +1267,7 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                 {translations[language]['today.no_expenses']}
               </p>
             ) : (
-              <div className="space-y-2 max-h-[140px] overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
                 {dayExpenses.map((ex) => (
                   <div
                     key={ex.id}
@@ -1265,7 +1281,7 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                       <span className={`font-mono font-bold text-sm shrink-0 ${
                         ex.type === 'income' 
                           ? 'text-emerald-600 dark:text-emerald-400' 
-                          : 'text-rose-600 dark:text-rose-450'
+                          : 'text-rose-600 dark:text-rose-455'
                       }`}>
                         {ex.type === 'income' ? '+' : '-'} NT$ {ex.amount}
                       </span>
@@ -1294,141 +1310,6 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
             )}
           </div>
         </div>
-      </div>      {/* SECTION 4: BRAIN DUMP */}
-      <div className={`p-4 ${
-        theme === 'natural-tones'
-          ? 'bg-white border border-natural-border rounded-[24px] shadow-2xs'
-          : 'bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800'
-      }`} id="braindump-card">
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center gap-1.5">
-            <Sparkles className={`w-4 h-4 ${theme === 'natural-tones' ? 'text-natural-sage' : 'text-amber-850 dark:text-amber-500'}`} />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-450">
-              <span className={theme === 'natural-tones' ? 'text-xs font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>
-                {translations[language]['today.ai_brain_dump']}
-              </span>
-            </h3>
-          </div>
-          <span className="text-[11px] font-mono text-stone-400 dark:text-stone-500">
-            {aiProcessing ? (
-              <span className="animate-pulse text-amber-700 dark:text-amber-400 font-bold">{translations[language]['today.ai_processing']}</span>
-            ) : (
-              <>
-                {brainDumpSaveStatus === 'saving' && (language === 'zh-TW' ? '儲存中...' : 'Saving...')}
-                {brainDumpSaveStatus === 'saved' && (language === 'zh-TW' ? '已儲存' : 'Saved draft')}
-              </>
-            )}
-          </span>
-        </div>
-
-        {/* Single Chatbox Layout */}
-        <div className="relative flex gap-2 items-end border border-stone-200 dark:border-stone-800 rounded-xl bg-stone-50/50 dark:bg-stone-900/40 p-2 focus-within:ring-1 focus-within:ring-natural-sage transition-all">
-          <textarea
-            value={dayBrainDump}
-            onChange={(e) => handleBrainDumpChange(e.target.value)}
-            disabled={aiProcessing}
-            placeholder={translations[language]['today.placeholder_braindump']}
-            rows={1}
-            className="flex-1 text-sm font-sans leading-relaxed text-stone-805 dark:text-stone-150 bg-transparent resize-none focus:outline-none px-2 py-1.5 placeholder-stone-400 dark:placeholder-stone-500 min-h-[40px] max-h-[120px]"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault();
-                handleOrganizeWithAI();
-              }
-            }}
-          />
-          <button
-            onClick={handleOrganizeWithAI}
-            disabled={aiProcessing || !dayBrainDump.trim()}
-            className={`p-2 rounded-lg flex items-center justify-center shrink-0 transition-all cursor-pointer ${
-              theme === 'natural-tones'
-                ? 'bg-natural-sage text-white hover:bg-natural-sage/90 disabled:bg-stone-100 disabled:text-stone-400'
-                : 'bg-stone-800 hover:bg-stone-900 text-white dark:bg-stone-200 dark:text-stone-950 dark:hover:bg-stone-100 disabled:opacity-40'
-            } disabled:cursor-not-allowed`}
-            title={translations[language]['today.ai_brain_dump']}
-          >
-            <Sparkles className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* AI Error display */}
-        {aiError && (
-          <div className="mt-3 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 text-rose-700 dark:text-rose-400 text-sm flex gap-1.5 items-center font-sans">
-            <AlertCircle className="w-4.5 h-4.5 shrink-0" />
-            <span>{aiError}</span>
-          </div>
-        )}
-
-        {/* AI Success report */}
-        {aiResultSummary && (
-          <div className={`mt-3 p-3.5 rounded-lg border flex flex-col gap-2 font-sans ${
-            theme === 'natural-tones'
-              ? 'bg-natural-sage-light/40 border-natural-border/60'
-              : 'bg-emerald-50/50 dark:bg-emerald-950/10 border-emerald-100/20 dark:border-emerald-900/10'
-          }`}>
-            <h4 className="text-sm font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
-              <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
-              {translations[language]['today.ai_success']}
-            </h4>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs font-mono text-stone-600 dark:text-stone-400">
-              {aiResultSummary.eventsAdded > 0 && (
-                <span className="bg-white dark:bg-stone-900 p-1.5 rounded border text-center">
-                  📅 {aiResultSummary.eventsAdded} {translations[language]['today.event_count']}
-                </span>
-              )}
-              {aiResultSummary.tasksAdded > 0 && (
-                <span className="bg-white dark:bg-stone-900 p-1.5 rounded border text-center">
-                  ✓ {aiResultSummary.tasksAdded} {translations[language]['today.task_count']}
-                </span>
-              )}
-              {aiResultSummary.remindersAdded > 0 && (
-                <span className="bg-white dark:bg-stone-900 p-1.5 rounded border text-center">
-                  🔔 {aiResultSummary.remindersAdded} {translations[language]['today.goal_count']}
-                </span>
-              )}
-              {aiResultSummary.expensesAdded > 0 && (
-                <span className="bg-white dark:bg-stone-900 p-1.5 rounded border text-center">
-                  💰 {aiResultSummary.expensesAdded} {translations[language]['today.expense_count']}
-                </span>
-              )}
-              {aiResultSummary.journalsAdded > 0 && (
-                <span className="bg-white dark:bg-stone-900 p-1.5 rounded border text-center">
-                  ✍ {aiResultSummary.journalsAdded} {translations[language]['today.journal_count']}
-                </span>
-              )}
-            </div>
-            {aiResultSummary.preferencesRemembered && (
-              <p className="text-xs text-stone-550 dark:text-stone-450 italic mt-1 font-sans border-t pt-1.5 border-dashed border-stone-100">
-                💡 {translations[language]['today.ai_preference']} "{aiResultSummary.preferencesRemembered}"
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Stored Preferences Section */}
-        {state.preferences && (
-          <div className="mt-4 p-3.5 bg-stone-50 dark:bg-stone-900/20 border border-stone-200/50 dark:border-stone-800/80 rounded-xl font-sans">
-            <div className="flex justify-between items-center mb-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 font-mono">
-                {translations[language]['today.ai_remembered']}
-              </span>
-              <button
-                onClick={() => {
-                  if (window.confirm("Do you want to clear AI remembered preferences?")) {
-                    onUpdateState(prev => ({ ...prev, preferences: undefined }));
-                  }
-                }}
-                className="text-xs font-mono text-rose-600 hover:underline cursor-pointer"
-              >
-                {translations[language]['today.reset_preferences']}
-              </button>
-            </div>
-            <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed bg-white dark:bg-stone-950/40 p-3 rounded-lg border border-stone-100 dark:border-stone-900 font-mono">
-              {state.preferences}
-            </p>
-          </div>
-        )}
-
       </div>
 
       {/* 4. ITEM DETAILS POPOVER / MODAL */}

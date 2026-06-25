@@ -31,10 +31,13 @@ async function startServer() {
       const ai = new GoogleGenAI({ apiKey });
 
       const prompt = `
-You are a planning assistant. Parse the following unstructured "Brain Dump" text written by the user and extract actionable planner items.
+You are a planning assistant. Parse the following unstructured journal entries/daily thoughts text written by the user.
+Extract any actionable planner items (events, tasks, reminders, or expenses).
 The user's active date is "${activeDate}". If they say "today", "tomorrow", "yesterday", or imply relative dates, calculate it relative to this active date.
 If they specify a specific date, relative weekday (like "next Tuesday"), or general days, map it to the correct date. Format all dates as "YYYY-MM-DD".
-If they mention an expense or income, extract the numeric amount (e.g., "$150" or "NT$ 150" is 150). Determine if it is an expense (spent money) or an income (earned/received money).
+If they mention an expense or income, extract the numeric amount (e.g., "$150" or "NT$ 233" or "233nt" is 233). Determine if it is an expense (spent money) or an income (earned/received money).
+
+Additionally, perform "improv and organize" on the original text itself: create a beautifully polished, grammatically correct, well-written version of the user's daily journal/thoughts text in the original language (e.g. Traditional Chinese "zh-TW" or English "en-US"), and return it as the "polishedJournal" string.
 
 Supported Task tags are: 'Tea', 'Travel', 'College', 'Personal', 'None'. Choose the most fitting.
 Supported Expense categories: 'food', 'clothing', 'housing', 'transit', 'education', 'entertainment', 'other'. Choose the most fitting if transaction is an expense.
@@ -47,7 +50,7 @@ Text: "${content}"
         model: "gemini-3.5-flash",
         contents: prompt,
         config: {
-          systemInstruction: "You extract structured planner data from raw brain dumps. Be precise and conservative. Only extract what is clearly intended as an event, task, reminder, journal, or expense.",
+          systemInstruction: "You extract structured planner data and polish user journal entries. Be precise and conservative. Only extract what is clearly intended as an event, task, reminder, or expense.",
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -105,17 +108,9 @@ Text: "${content}"
                   required: ["date", "amount", "type", "category", "note"]
                 }
               },
-              journals: {
-                type: Type.ARRAY,
-                description: "Diary or journal entries recording thoughts, mood, feelings, or day summaries.",
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    date: { type: Type.STRING, description: "YYYY-MM-DD formatted date" },
-                    content: { type: Type.STRING, description: "The descriptive text of the entry" }
-                  },
-                  required: ["date", "content"]
-                }
+              polishedJournal: {
+                type: Type.STRING,
+                description: "A beautifully polished, improved, grammatically corrected, and well-organized version of the user's daily journal/thoughts text in the original language. Keep the original thoughts and facts but elevate the prose."
               },
               preferences: {
                 type: Type.STRING,
