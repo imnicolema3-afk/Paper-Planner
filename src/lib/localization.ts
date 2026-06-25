@@ -52,6 +52,14 @@ export const translations = {
     'today.note': 'Note (e.g. Salary, Oolong tea can, lunch box)',
     'today.type_expense': 'Expense',
     'today.type_income': 'Income',
+    'today.smart_input_placeholder': 'e.g. Delivery 233 or Salary 50000...',
+    'today.smart_quick_log': 'Smart Log',
+    'today.view_report': 'View Report',
+    'today.monthly_report': 'Monthly Financial Report',
+    'today.monthly_breakdown': 'Categorized Breakdown',
+    'today.monthly_item_list': "This Month's Ledger Items",
+    'today.no_monthly_expenses': 'No financial records this month',
+    'today.net_savings': 'Net Savings Rate',
     
     // Categories
     'category.food': 'Food 🍔',
@@ -160,6 +168,14 @@ export const translations = {
     'today.note': '備註（例如：薪資、高山烏龍茶葉、便當）',
     'today.type_expense': '支出',
     'today.type_income': '收入',
+    'today.smart_input_placeholder': '例如：外送 233 或 薪水 50000...',
+    'today.smart_quick_log': '智慧自動記帳',
+    'today.view_report': '查看報表',
+    'today.monthly_report': '月度收支報表',
+    'today.monthly_breakdown': '分類比例',
+    'today.monthly_item_list': '本月記帳明細',
+    'today.no_monthly_expenses': '本月無任何收支記錄',
+    'today.net_savings': '本月儲蓄率',
     
     // Categories
     'category.food': '食 🍔',

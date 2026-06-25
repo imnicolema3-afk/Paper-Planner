@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Tag, Calendar, Sparkles, Check, CheckCircle2, ChevronLeft, ChevronRight, AlertCircle, Bookmark, Cloud, Info } from 'lucide-react';
+import { Plus, Trash2, Tag, Calendar, Sparkles, Check, CheckCircle2, ChevronLeft, ChevronRight, AlertCircle, Bookmark, Cloud, Info, BarChart3, ChevronDown, ChevronUp, TrendingUp, Wallet } from 'lucide-react';
 import { PlannerState, PlannerEvent, PlannerTask, PlannerReminder, PlannerExpense, TaskTag, ThemeType } from '../types';
 import { Language, translations } from '../lib/localization';
 
@@ -35,6 +35,11 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
   const [taskTag, setTaskTag] = useState<TaskTag>('None');
 
   const [reminderTitle, setReminderTitle] = useState('');
+
+  const [smartExpenseInput, setSmartExpenseInput] = useState('');
+  const [isParsingSmartExpense, setIsParsingSmartExpense] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showManualExpenseForm, setShowManualExpenseForm] = useState(false);
 
   const [expenseType, setExpenseType] = useState<'expense' | 'income'>('expense');
   const [expenseAmount, setExpenseAmount] = useState('');
@@ -422,6 +427,90 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
 
     setExpenseAmount('');
     setExpenseNote('');
+  };
+
+  const handleSmartExpenseSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!smartExpenseInput.trim()) return;
+
+    setIsParsingSmartExpense(true);
+
+    // Short smart simulation delay for smooth UX feeling
+    await new Promise(resolve => setTimeout(resolve, 350));
+
+    const input = smartExpenseInput.trim();
+    const amountRegex = /(?:NT\$?|\$)?\s*([0-9]+(?:[,.][0-9]+)?)\s*(?:元|nt|usd|hkd|rmb|dollars|bucks)?/i;
+    const match = input.match(amountRegex);
+    
+    let amount = 0;
+    if (match && match[1]) {
+      amount = parseFloat(match[1].replace(/,/g, ''));
+    }
+
+    if (isNaN(amount) || amount <= 0) {
+      setIsParsingSmartExpense(false);
+      return;
+    }
+
+    let note = input;
+    if (match && match[0]) {
+      note = note.replace(match[0], '');
+    }
+    note = note.replace(/[,.，。!！?？]/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!note) {
+      note = language === 'zh-TW' ? '未命名項目' : 'Unnamed Item';
+    }
+
+    const incomeKeywords = ['薪', '資', '收入', '賺', '紅包', '獎金', '外快', '利息', 'salary', 'income', 'bonus', 'earned', 'pay', 'inc'];
+    const isIncome = incomeKeywords.some(keyword => input.toLowerCase().includes(keyword));
+    const type: 'expense' | 'income' = isIncome ? 'income' : 'expense';
+
+    let category = 'other';
+    if (isIncome) {
+      if (input.includes('薪水') || input.includes('薪資') || input.toLowerCase().includes('salary') || input.toLowerCase().includes('pay')) {
+        category = 'salary';
+      } else {
+        category = 'other';
+      }
+    } else {
+      const foodKeywords = ['外送', '吃', '餐', '飯', '麵', '蛋', '飲料', '茶', '肉', '咖啡', '午餐', '晚餐', '早餐', '麥當勞', 'food', 'drink', 'eat', 'lunch', 'dinner', 'restaurant', 'cafe'];
+      const clothingKeywords = ['衣服', '褲子', '鞋', '衣', '飾品', '買衣服', '裙', 'clothes', 'wear', 'shirt', 'shoes', 'boutique'];
+      const housingKeywords = ['租', '房', '住', '水電', '瓦斯', '管理費', '電費', 'rent', 'housing', 'electricity', 'water bill', 'utilities'];
+      const transitKeywords = ['捷運', '公車', '計程車', '高鐵', '火車', '車資', '行', '油', '交通', '機車', '悠遊卡', 'bus', 'taxi', 'mrt', 'gas', 'metro', 'train', 'uber'];
+      const educationKeywords = ['書', '學費', '課程', '課', '育', '文具', '筆記', 'book', 'school', 'course', 'class', 'tuition'];
+      const entertainmentKeywords = ['電影', '遊戲', '玩', '樂', '唱歌', 'ktv', '歡樂', '景點', '門票', '娛樂', '育樂', '課金', '玩具', 'movie', 'game', 'fun', 'play', 'amusement'];
+
+      if (foodKeywords.some(kw => input.toLowerCase().includes(kw))) {
+        category = 'food';
+      } else if (clothingKeywords.some(kw => input.toLowerCase().includes(kw))) {
+        category = 'clothing';
+      } else if (housingKeywords.some(kw => input.toLowerCase().includes(kw))) {
+        category = 'housing';
+      } else if (transitKeywords.some(kw => input.toLowerCase().includes(kw))) {
+        category = 'transit';
+      } else if (educationKeywords.some(kw => input.toLowerCase().includes(kw))) {
+        category = 'education';
+      } else if (entertainmentKeywords.some(kw => input.toLowerCase().includes(kw))) {
+        category = 'entertainment';
+      }
+    }
+
+    const newExpense: PlannerExpense = {
+      id: `ex-${Date.now()}`,
+      date: selectedDate,
+      amount,
+      category,
+      note,
+      type
+    };
+
+    onUpdateState(prev => ({
+      ...prev,
+      expenses: [...prev.expenses, newExpense]
+    }));
+
+    setSmartExpenseInput('');
+    setIsParsingSmartExpense(false);
   };
 
   const handleDeleteExpense = (id: string) => {
@@ -957,19 +1046,33 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
             : 'bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800'
         }`} id="expenses-card-ledger">
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-3 border-b border-stone-100 dark:border-stone-900 pb-2">
-              <span className={theme === 'natural-tones' ? 'text-xs font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>
-                {translations[language]['today.expenses_tracker']}
-              </span>
-            </h3>
+            <div className="flex justify-between items-center mb-3 border-b border-stone-100 dark:border-stone-900 pb-2">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300">
+                <span className={theme === 'natural-tones' ? 'text-xs font-bold uppercase tracking-[0.1em] text-natural-muted' : ''}>
+                  {translations[language]['today.expenses_tracker']}
+                </span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowReportModal(true)}
+                className={`text-xs px-2.5 py-1.5 rounded-lg border font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                  theme === 'natural-tones'
+                    ? 'border-natural-border bg-white text-natural-sage hover:bg-natural-sage-light'
+                    : 'border-stone-200 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-900 text-stone-600 dark:text-stone-400'
+                }`}
+              >
+                <BarChart3 className="w-3.5 h-3.5 text-natural-sage" />
+                <span>{translations[language]['today.view_report']}</span>
+              </button>
+            </div>
 
             {/* Total cards summary */}
-            <div className="grid grid-cols-3 gap-2 mb-4">
+            <div className="grid grid-cols-3 gap-2 mb-3.5">
               <div className="p-2 bg-stone-105/40 dark:bg-stone-900/40 rounded-lg border border-stone-200/40 dark:border-stone-800/40 text-center">
                 <span className="block text-[10px] font-mono text-stone-400 dark:text-stone-500 uppercase">
                   {language === 'zh-TW' ? '總支出' : 'Total Exp'}
                 </span>
-                <span className="text-sm font-semibold text-rose-600 dark:text-rose-400">
+                <span className="text-sm font-bold text-rose-600 dark:text-rose-450">
                   NT$ {totalExpenses}
                 </span>
               </div>
@@ -977,7 +1080,7 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                 <span className="block text-[10px] font-mono text-stone-400 dark:text-stone-500 uppercase">
                   {language === 'zh-TW' ? '總收入' : 'Total Inc'}
                 </span>
-                <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-450">
                   NT$ {totalIncome}
                 </span>
               </div>
@@ -985,110 +1088,162 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
                 <span className="block text-[10px] font-mono text-stone-400 dark:text-stone-500 uppercase">
                   {language === 'zh-TW' ? '結餘' : 'Balance'}
                 </span>
-                <span className={`text-sm font-semibold ${netBalance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                <span className={`text-sm font-bold ${netBalance >= 0 ? 'text-emerald-600 dark:text-emerald-450' : 'text-rose-600 dark:text-rose-450'}`}>
                   NT$ {netBalance}
                 </span>
               </div>
             </div>
 
-            {/* Ledger entry form */}
-            <form onSubmit={handleAddExpense} className={`mb-4 space-y-2.5 p-3 border rounded-xl ${
-              theme === 'natural-tones'
-                ? 'bg-natural-sage-light/40 border-natural-border'
-                : 'bg-stone-50 dark:bg-stone-900/60 border-stone-200/50 dark:border-stone-800'
-            }`}>
-              {/* Type selector toggle */}
-              <div className="flex gap-1 border border-stone-250 dark:border-stone-800 rounded-lg p-0.5 bg-white dark:bg-stone-950 overflow-hidden shadow-2xs">
-                <button
-                  type="button"
-                  onClick={() => setExpenseType('expense')}
-                  className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                    expenseType === 'expense'
-                      ? theme === 'natural-tones'
-                        ? 'bg-natural-sage text-white'
-                        : 'bg-stone-800 dark:bg-stone-200 text-white dark:text-stone-950'
-                      : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
-                  }`}
-                >
-                  {translations[language]['today.type_expense']}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setExpenseType('income')}
-                  className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                    expenseType === 'income'
-                      ? theme === 'natural-tones'
-                        ? 'bg-natural-sage text-white'
-                        : 'bg-natural-sage/10 text-natural-sage border border-natural-sage-border'
-                      : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
-                  }`}
-                >
-                  {translations[language]['today.type_income']}
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="number"
-                  placeholder={translations[language]['today.amount']}
-                  value={expenseAmount}
-                  onChange={(e) => setExpenseAmount(e.target.value)}
-                  className={`px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
-                    theme === 'natural-tones'
-                      ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
-                      : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
-                  }`}
-                  required
-                />
-                <select
-                  value={expenseCategory}
-                  onChange={(e) => setExpenseCategory(e.target.value)}
-                  className={`px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none font-sans ${
-                    theme === 'natural-tones'
-                      ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
-                      : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
-                  }`}
-                >
-                  {expenseType === 'expense' ? (
-                    expenseCategories.map(cat => (
-                      <option key={cat} value={cat}>
-                        {translations[language][`category.${cat}`]}
-                      </option>
-                    ))
-                  ) : (
-                    incomeCategories.map(cat => (
-                      <option key={cat} value={cat}>
-                        {translations[language][`category.${cat}`]}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-
+            {/* Smart Voice-Like Chatbox entry */}
+            <form onSubmit={handleSmartExpenseSubmit} className="mb-3">
               <div className="flex gap-1.5">
-                <input
-                  type="text"
-                  placeholder={translations[language]['today.note']}
-                  value={expenseNote}
-                  onChange={(e) => setExpenseNote(e.target.value)}
-                  className={`flex-1 px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
-                    theme === 'natural-tones'
-                      ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
-                      : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
-                  }`}
-                />
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={smartExpenseInput}
+                    onChange={(e) => setSmartExpenseInput(e.target.value)}
+                    placeholder={translations[language]['today.smart_input_placeholder']}
+                    disabled={isParsingSmartExpense}
+                    className={`w-full px-3 py-2 pr-8 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
+                      theme === 'natural-tones'
+                        ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
+                        : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
+                    }`}
+                  />
+                  {isParsingSmartExpense && (
+                    <span className="absolute right-2.5 top-3 flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                  )}
+                </div>
                 <button
                   type="submit"
-                  className={`px-4.5 py-2 text-sm rounded-lg cursor-pointer font-medium transition-colors shrink-0 ${
+                  disabled={isParsingSmartExpense || !smartExpenseInput.trim()}
+                  className={`px-3 py-2 text-sm rounded-lg font-bold flex items-center justify-center gap-1 cursor-pointer shrink-0 transition-all ${
                     theme === 'natural-tones'
-                      ? 'bg-natural-sage text-white hover:bg-natural-sage/90 border border-transparent'
-                      : 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-950 hover:bg-stone-900'
-                  }`}
+                      ? 'bg-natural-sage text-white hover:bg-natural-sage/90 disabled:bg-stone-100 disabled:text-stone-400'
+                      : 'bg-stone-800 hover:bg-stone-900 text-white dark:bg-stone-200 dark:text-stone-950 dark:hover:bg-stone-100 disabled:opacity-40'
+                  } disabled:cursor-not-allowed`}
                 >
-                  {translations[language]['today.save']}
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{translations[language]['today.smart_quick_log']}</span>
                 </button>
               </div>
             </form>
+
+            {/* Manual Form Toggle */}
+            <div className="mb-3 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setShowManualExpenseForm(!showManualExpenseForm)}
+                className="text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 font-medium flex items-center gap-1 transition-all cursor-pointer py-1 px-2 rounded hover:bg-stone-100/40 dark:hover:bg-stone-900/40"
+              >
+                {showManualExpenseForm ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                <span>{language === 'zh-TW' ? '手動詳細記帳' : 'Detailed Manual Log'}</span>
+              </button>
+            </div>
+
+            {/* Collapsible Manual Ledger Form */}
+            {showManualExpenseForm && (
+              <form onSubmit={handleAddExpense} className={`mb-3.5 space-y-2.5 p-3 border rounded-xl animate-fadeIn ${
+                theme === 'natural-tones'
+                  ? 'bg-natural-sage-light/40 border-natural-border'
+                  : 'bg-stone-50 dark:bg-stone-900/60 border-stone-200/50 dark:border-stone-800'
+              }`}>
+                {/* Type selector toggle */}
+                <div className="flex gap-1 border border-stone-250 dark:border-stone-800 rounded-lg p-0.5 bg-white dark:bg-stone-950 overflow-hidden shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => setExpenseType('expense')}
+                    className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                      expenseType === 'expense'
+                        ? theme === 'natural-tones'
+                          ? 'bg-natural-sage text-white'
+                          : 'bg-stone-800 dark:bg-stone-200 text-white dark:text-stone-950'
+                        : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+                    }`}
+                  >
+                    {translations[language]['today.type_expense']}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExpenseType('income')}
+                    className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                      expenseType === 'income'
+                        ? theme === 'natural-tones'
+                          ? 'bg-natural-sage text-white'
+                          : 'bg-natural-sage/10 text-natural-sage border border-natural-sage-border'
+                        : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+                    }`}
+                  >
+                    {translations[language]['today.type_income']}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="number"
+                    placeholder={translations[language]['today.amount']}
+                    value={expenseAmount}
+                    onChange={(e) => setExpenseAmount(e.target.value)}
+                    className={`px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
+                      theme === 'natural-tones'
+                        ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
+                        : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
+                    }`}
+                    required
+                  />
+                  <select
+                    value={expenseCategory}
+                    onChange={(e) => setExpenseCategory(e.target.value)}
+                    className={`px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none font-sans ${
+                      theme === 'natural-tones'
+                        ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
+                        : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
+                    }`}
+                  >
+                    {expenseType === 'expense' ? (
+                      expenseCategories.map(cat => (
+                        <option key={cat} value={cat}>
+                          {translations[language][`category.${cat}`]}
+                        </option>
+                      ))
+                    ) : (
+                      incomeCategories.map(cat => (
+                        <option key={cat} value={cat}>
+                          {translations[language][`category.${cat}`]}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+
+                <div className="flex gap-1.5">
+                  <input
+                    type="text"
+                    placeholder={translations[language]['today.note']}
+                    value={expenseNote}
+                    onChange={(e) => setExpenseNote(e.target.value)}
+                    className={`flex-1 px-3.5 py-2 text-sm border rounded-lg text-stone-800 dark:text-stone-100 focus:outline-none placeholder-stone-400 ${
+                      theme === 'natural-tones'
+                        ? 'border-natural-border bg-white focus:ring-1 focus:ring-natural-sage'
+                        : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 focus:outline-amber-600'
+                    }`}
+                  />
+                  <button
+                    type="submit"
+                    className={`px-4.5 py-2 text-sm rounded-lg cursor-pointer font-medium transition-colors shrink-0 ${
+                      theme === 'natural-tones'
+                        ? 'bg-natural-sage text-white hover:bg-natural-sage/90 border border-transparent'
+                        : 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-950 hover:bg-stone-900'
+                    }`}
+                  >
+                    {translations[language]['today.save']}
+                  </button>
+                </div>
+              </form>
+            )}
 
             {/* Ledger logs list */}
             {dayExpenses.length === 0 ? (
@@ -1384,6 +1539,204 @@ export default function TodayView({ selectedDate, state, onUpdateState, theme, u
           </div>
         </div>
       )}
+
+      {/* MONTHLY FINANCIAL REPORT MODAL */}
+      {showReportModal && (() => {
+        const activeMonthStr = selectedDate.substring(0, 7); // e.g. "2026-06"
+        const expensesForMonth = state.expenses.filter(ex => ex.date && ex.date.startsWith(activeMonthStr));
+        
+        const monthlyExpensesTotal = expensesForMonth.filter(ex => ex.type !== 'income').reduce((sum, ex) => sum + ex.amount, 0);
+        const monthlyIncomeTotal = expensesForMonth.filter(ex => ex.type === 'income').reduce((sum, ex) => sum + ex.amount, 0);
+        const monthlyNetSavings = monthlyIncomeTotal - monthlyExpensesTotal;
+        const savingsRate = monthlyIncomeTotal > 0 ? Math.round((monthlyNetSavings / monthlyIncomeTotal) * 100) : 0;
+
+        // Calculate Category Breakdown
+        const categoryTotals: Record<string, number> = {};
+        expenseCategories.forEach(cat => { categoryTotals[cat] = 0; });
+        categoryTotals['other'] = 0;
+        expensesForMonth.filter(ex => ex.type !== 'income').forEach(ex => {
+          const cat = ex.category || 'other';
+          categoryTotals[cat] = (categoryTotals[cat] || 0) + ex.amount;
+        });
+
+        // Sorted categories with spending > 0
+        const spentCategories = Object.entries(categoryTotals)
+          .map(([category, amount]) => ({ category, amount }))
+          .filter(item => item.amount > 0)
+          .sort((a, b) => b.amount - a.amount);
+
+        // Month formatting helper
+        const getMonthDisplay = () => {
+          const parts = selectedDate.split('-');
+          if (parts.length < 2) return selectedDate;
+          const [year, month] = parts;
+          const dateObj = new Date(parseInt(year), parseInt(month) - 1, 1);
+          if (language === 'zh-TW') {
+            return `${year} 年 ${parseInt(month)} 月`;
+          } else {
+            return dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+          }
+        };
+
+        return (
+          <div className="fixed inset-0 bg-stone-900/45 dark:bg-stone-950/75 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-xl bg-white dark:bg-stone-900 rounded-[24px] border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden p-6 font-sans">
+              
+              {/* Modal Header */}
+              <div className="flex justify-between items-center border-b border-stone-100 dark:border-stone-800 pb-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-natural-sage shrink-0" />
+                  <div>
+                    <h4 className="text-base font-bold text-stone-850 dark:text-stone-100 leading-tight">
+                      {translations[language]['today.monthly_report']}
+                    </h4>
+                    <p className="text-xs font-mono text-stone-400 dark:text-stone-550 mt-0.5">
+                      {getMonthDisplay()}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowReportModal(false)}
+                  className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 text-sm font-bold transition-colors cursor-pointer w-7 h-7 flex items-center justify-center rounded-full hover:bg-stone-50 dark:hover:bg-stone-800"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Modal Body (Scrollable if content gets large) */}
+              <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1">
+                
+                {/* 1. Key Metrics Bento Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-rose-50/30 dark:bg-rose-950/5 rounded-xl border border-rose-100/30 dark:border-rose-900/10">
+                    <span className="block text-[10px] font-mono text-stone-450 dark:text-stone-500 uppercase font-semibold">
+                      {language === 'zh-TW' ? '本月總支出' : 'Monthly Exp'}
+                    </span>
+                    <span className="text-lg font-extrabold text-rose-600 dark:text-rose-450 mt-1 block">
+                      NT$ {monthlyExpensesTotal}
+                    </span>
+                  </div>
+                  <div className="p-3 bg-emerald-50/30 dark:bg-emerald-950/5 rounded-xl border border-emerald-100/30 dark:border-emerald-900/10">
+                    <span className="block text-[10px] font-mono text-stone-450 dark:text-stone-500 uppercase font-semibold">
+                      {language === 'zh-TW' ? '本月總收入' : 'Monthly Inc'}
+                    </span>
+                    <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-450 mt-1 block">
+                      NT$ {monthlyIncomeTotal}
+                    </span>
+                  </div>
+                  <div className="p-3 bg-stone-105/40 dark:bg-stone-900/40 rounded-xl border border-stone-200/40 dark:border-stone-800/40 col-span-2 flex justify-between items-center">
+                    <div>
+                      <span className="block text-[10px] font-mono text-stone-450 dark:text-stone-500 uppercase font-semibold">
+                        {language === 'zh-TW' ? '本月淨收支' : 'Monthly Savings'}
+                      </span>
+                      <span className={`text-base font-extrabold mt-0.5 block ${monthlyNetSavings >= 0 ? 'text-emerald-600 dark:text-emerald-455' : 'text-rose-600 dark:text-rose-455'}`}>
+                        NT$ {monthlyNetSavings}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-[10px] font-mono text-stone-450 dark:text-stone-500 uppercase font-semibold">
+                        {translations[language]['today.net_savings']}
+                      </span>
+                      <span className="text-base font-extrabold mt-0.5 block text-stone-800 dark:text-stone-200">
+                        {savingsRate}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Category Progress Bars */}
+                <div>
+                  <h5 className="text-xs font-mono font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-2.5">
+                    {translations[language]['today.monthly_breakdown']}
+                  </h5>
+                  {spentCategories.length === 0 ? (
+                    <p className="text-xs text-stone-400 dark:text-stone-500 italic py-2 text-center">
+                      {translations[language]['today.no_monthly_expenses']}
+                    </p>
+                  ) : (
+                    <div className="space-y-2.5 bg-stone-50/50 dark:bg-stone-950/20 p-3.5 rounded-xl border border-stone-100 dark:border-stone-900/50">
+                      {spentCategories.map(({ category, amount }) => {
+                        const percent = monthlyExpensesTotal > 0 ? Math.round((amount / monthlyExpensesTotal) * 100) : 0;
+                        return (
+                          <div key={category} className="space-y-1">
+                            <div className="flex justify-between text-xs text-stone-650 dark:text-stone-355 font-sans font-medium">
+                              <span className="flex items-center gap-1">
+                                {translations[language][`category.${category}`] || category}
+                              </span>
+                              <span className="font-mono">
+                                NT$ {amount} ({percent}%)
+                              </span>
+                            </div>
+                            <div className="w-full bg-stone-100 dark:bg-stone-850 h-2 rounded-full overflow-hidden">
+                              <div 
+                                className="bg-natural-sage h-full rounded-full transition-all"
+                                style={{ width: `${percent}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. This Month's Items List */}
+                <div>
+                  <h5 className="text-xs font-mono font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-2.5">
+                    {translations[language]['today.monthly_item_list']}
+                  </h5>
+                  {expensesForMonth.length === 0 ? (
+                    <p className="text-xs text-stone-400 dark:text-stone-500 italic py-4 text-center">
+                      {translations[language]['today.no_monthly_expenses']}
+                    </p>
+                  ) : (
+                    <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
+                      {expensesForMonth.map((ex) => (
+                        <div 
+                          key={ex.id}
+                          className="flex justify-between items-center py-2 px-2.5 border border-stone-100 dark:border-stone-900/60 rounded-lg text-xs bg-white dark:bg-stone-950"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-mono text-stone-400 dark:text-stone-550 shrink-0">
+                              {ex.date ? ex.date.substring(8, 10) : '--'}
+                            </span>
+                            <span className={`font-mono font-bold ${ex.type === 'income' ? 'text-emerald-600 dark:text-emerald-450' : 'text-rose-600 dark:text-rose-450'}`}>
+                              {ex.type === 'income' ? '+' : '-'} NT$ {ex.amount}
+                            </span>
+                            <span className="text-stone-555 dark:text-stone-400 font-sans truncate max-w-[130px]">
+                              {ex.note}
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-sans bg-stone-100 dark:bg-stone-850 text-stone-500 dark:text-stone-400 px-1.5 py-0.5 rounded-full shrink-0">
+                            {translations[language][`category.${ex.category}`] || ex.category}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex justify-end border-t border-stone-100 dark:border-stone-800 pt-4 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowReportModal(false)}
+                  className={`px-5 py-2 text-sm font-semibold rounded-lg cursor-pointer transition-all ${
+                    theme === 'natural-tones'
+                      ? 'bg-natural-sage text-white hover:bg-natural-sage/95'
+                      : 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-950 hover:opacity-90'
+                  }`}
+                >
+                  {translations[language]['detail.close']}
+                </button>
+              </div>
+
+            </div>
+          </div>
+        );
+      })()}
 
     </div>
   );
