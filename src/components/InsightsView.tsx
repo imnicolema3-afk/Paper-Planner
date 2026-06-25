@@ -5,6 +5,7 @@ import { PlannerState, PlannerTask, TaskTag, ThemeType } from '../types';
 interface InsightsViewProps {
   state: PlannerState;
   theme: ThemeType;
+  language?: any;
 }
 
 export default function InsightsView({ state, theme }: InsightsViewProps) {

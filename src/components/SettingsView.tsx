@@ -2,6 +2,7 @@ import React from 'react';
 import { Settings, Moon, Sun, RotateCcw, Download, Upload, Trash2, Heart, ExternalLink, RefreshCw, Cloud, LogOut, User, Phone, Cake, Activity, Check, Edit3, Save, ChevronDown } from 'lucide-react';
 import { ThemeType, PlannerState, UserProfile } from '../types';
 import { generateInitialData } from '../data/initialData';
+import { Language, translations } from '../lib/localization';
 
 interface SettingsViewProps {
   theme: ThemeType;
@@ -12,6 +13,8 @@ interface SettingsViewProps {
   onLogout: () => void;
   userProfile?: UserProfile | null;
   onUpdateProfile?: (profile: UserProfile) => void;
+  language: Language;
+  onChangeLanguage: (lang: Language) => void;
 }
 
 export default function SettingsView({ 
@@ -22,7 +25,9 @@ export default function SettingsView({
   userEmail, 
   onLogout,
   userProfile,
-  onUpdateProfile
+  onUpdateProfile,
+  language,
+  onChangeLanguage
 }: SettingsViewProps) {
   
   // Profile editing states
@@ -375,10 +380,43 @@ export default function SettingsView({
           </div>
         )}
 
+        {/* LANGUAGE SELECTOR CARD */}
+        <div className="p-5 bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800" id="language-card">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-4">
+            {translations[language]['settings.language_label']}
+          </h3>
+
+          <div className="flex gap-4">
+            {[
+              { id: 'en', name: 'English (US)' },
+              { id: 'zh-TW', name: '繁體中文 (Traditional Chinese)' }
+            ].map((langOption) => (
+              <button
+                key={langOption.id}
+                onClick={() => onChangeLanguage(langOption.id as Language)}
+                className={`flex-1 px-4 py-3 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer hover:shadow-xs ${
+                  language === langOption.id
+                    ? theme === 'natural-tones'
+                      ? 'bg-natural-sage-light/30 border-natural-border ring-2 ring-natural-sage'
+                      : 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900 ring-2 ring-amber-600 dark:ring-amber-500'
+                    : 'bg-stone-50 dark:bg-stone-900 border-stone-200 dark:border-stone-800 opacity-70 hover:opacity-100'
+                }`}
+              >
+                <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">
+                  {langOption.name}
+                </span>
+                {language === langOption.id && (
+                  <Check className={`w-4.5 h-4.5 ${theme === 'natural-tones' ? 'text-natural-sage' : 'text-amber-800 dark:text-amber-500'}`} />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* THEME SELECTOR CARD */}
         <div className="p-5 bg-white dark:bg-stone-950 rounded-xl border border-stone-200 dark:border-stone-800">
           <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-4">
-            Parchment Theme Presets
+            {translations[language]['settings.theme_label'] || "Parchment Theme Presets"}
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">

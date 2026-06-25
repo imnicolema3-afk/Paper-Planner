@@ -9,6 +9,7 @@ interface CalendarViewProps {
   onSelectDate: (date: string) => void;
   onNavigateToTodayTab: () => void;
   theme: ThemeType;
+  language?: any;
 }
 
 export default function CalendarView({ selectedDate, state, onSelectDate, onNavigateToTodayTab, theme }: CalendarViewProps) {

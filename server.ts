@@ -34,10 +34,11 @@ async function startServer() {
 You are a planning assistant. Parse the following unstructured "Brain Dump" text written by the user and extract actionable planner items.
 The user's active date is "${activeDate}". If they say "today", "tomorrow", "yesterday", or imply relative dates, calculate it relative to this active date.
 If they specify a specific date, relative weekday (like "next Tuesday"), or general days, map it to the correct date. Format all dates as "YYYY-MM-DD".
-If they mention an expense, extract the numeric amount (e.g., "$150" or "NT$ 150" is 150).
+If they mention an expense or income, extract the numeric amount (e.g., "$150" or "NT$ 150" is 150). Determine if it is an expense (spent money) or an income (earned/received money).
 
 Supported Task tags are: 'Tea', 'Travel', 'College', 'Personal', 'None'. Choose the most fitting.
-Supported Expense categories are: 'Food', 'Transit', 'Shopping', 'Tea', 'Rent', 'Others'. Choose the most fitting.
+Supported Expense categories: 'food', 'clothing', 'housing', 'transit', 'education', 'entertainment', 'other'. Choose the most fitting if transaction is an expense.
+Supported Income categories: 'salary', 'other'. Choose the most fitting if transaction is an income.
 
 Text: "${content}"
 `;
@@ -91,16 +92,17 @@ Text: "${content}"
               },
               expenses: {
                 type: Type.ARRAY,
-                description: "Financial transactions or spent amounts.",
+                description: "Financial transactions (expenses or incomes).",
                 items: {
                   type: Type.OBJECT,
                   properties: {
                     date: { type: Type.STRING, description: "YYYY-MM-DD formatted date" },
                     amount: { type: Type.NUMBER, description: "Numeric amount in currency (NT$)" },
-                    category: { type: Type.STRING, description: "One of: Food, Transit, Shopping, Tea, Rent, Others" },
-                    note: { type: Type.STRING, description: "Specific item purchased" }
+                    type: { type: Type.STRING, description: "Must be 'expense' or 'income'" },
+                    category: { type: Type.STRING, description: "For expense, choose: food, clothing, housing, transit, education, entertainment, other. For income, choose: salary, other." },
+                    note: { type: Type.STRING, description: "Specific source/reason of expense or income (e.g. 'high-mountain oolong', 'monthly pay')" }
                   },
-                  required: ["date", "amount", "category", "note"]
+                  required: ["date", "amount", "type", "category", "note"]
                 }
               },
               journals: {

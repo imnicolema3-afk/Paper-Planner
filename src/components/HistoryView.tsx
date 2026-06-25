@@ -7,6 +7,7 @@ interface HistoryViewProps {
   onSelectDate: (date: string) => void;
   onNavigateToTodayTab: () => void;
   theme: ThemeType;
+  language?: any;
 }
 
 export default function HistoryView({ state, onSelectDate, onNavigateToTodayTab, theme }: HistoryViewProps) {

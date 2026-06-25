@@ -13,6 +13,7 @@ export interface PlannerTask {
   title: string;
   tag: TaskTag;
   completed: boolean;
+  memo?: string;
 }
 
 export interface PlannerReminder {
@@ -20,6 +21,8 @@ export interface PlannerReminder {
   date: string; // YYYY-MM-DD
   title: string;
   completed?: boolean;
+  tag?: TaskTag;
+  memo?: string;
 }
 
 export interface PlannerJournal {
@@ -34,6 +37,7 @@ export interface PlannerExpense {
   amount: number;
   category: string;
   note: string;
+  type?: 'expense' | 'income';
 }
 
 export interface PlannerBrainDump {
